@@ -1,4 +1,4 @@
-﻿public class BasicRoot : RootBase
+﻿public class BasicRoot : BaseRoot
 {
     public override string GetName()
     {

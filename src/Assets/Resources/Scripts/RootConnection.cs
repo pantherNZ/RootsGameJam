@@ -4,4 +4,5 @@ using UnityEngine;
 
 public class RootConnection : MonoBehaviour
 {
+    public Root parent;
 }
