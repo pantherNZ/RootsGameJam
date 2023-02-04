@@ -4,9 +4,10 @@ using UnityEngine;
 
 public class LevelGenerator : MonoBehaviour
 {
-    [SerializeField] GameObject dirtTile;
+    [SerializeField] GameObject dirtTilePrefab;
     [SerializeField] int dirtTileSize;
     [SerializeField] float groundHeightOffset;
+    [SerializeField] float timeOfDay;
 
     private List<GameObject> tiles = new List<GameObject>();
 
@@ -18,7 +19,7 @@ public class LevelGenerator : MonoBehaviour
         {
             for( int x = -1; x <= 1; x++ )
             {
-                tiles.Add( Instantiate( dirtTile, new Vector3( ( float )x * dirtTileSize, height + y * dirtTileSize, 0.0f ), Quaternion.identity ) );
+                tiles.Add( Instantiate( dirtTilePrefab, new Vector3( ( float )x * dirtTileSize, height + y * dirtTileSize, 0.0f ), Quaternion.identity ) );
             }
         }
     }
