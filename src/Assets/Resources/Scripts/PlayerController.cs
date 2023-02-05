@@ -36,7 +36,7 @@ public class PlayerController : EventReceiverInstance
     [SerializeField] TMPro.TextMeshProUGUI levelUI;
     [SerializeField] float menuFadeOutTime = 1.0f;
     [SerializeField] float rootScale = 1.0f;
-    [SerializeField] bool inMenu = true;
+    public bool inMenu = true;
     [SerializeField] Color invalidPlacementColour = Color.red;
     [SerializeField] float rootMaxAngleDegrees = 150.0f;
 
@@ -67,6 +67,8 @@ public class PlayerController : EventReceiverInstance
 
         waterBarUI.SetValue( water, waterMax );
         foodBarUI.SetValue( nutrients, nutrientsMax );
+
+        ShowLevelUpPopup( false );
     }
 
     void ListenToConnections( RootConnection[] connections )
@@ -238,9 +240,12 @@ public class PlayerController : EventReceiverInstance
         levelUI.text = l.ToString();
     }
 
-    public void ShowLevelUpPopup()
+    public void ShowLevelUpPopup( bool show )
     {
-        levelUpUI.SetActive( true );
+        levelUpUI.SetActive( show && !inMenu );
+        var texts = levelUpUI.GetComponentsInChildren<TMPro.TextMeshProUGUI>();
+        texts[0].text = string.Format( "Next Tree Age: {0}\nCost: ", level + 1 );
+        texts[1].text = texts[2].text = GetLevelUpCost().ToString();
     }
 
     public void LevelUp()

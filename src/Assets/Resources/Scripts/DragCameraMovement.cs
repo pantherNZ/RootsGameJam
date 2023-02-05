@@ -36,10 +36,6 @@ public class DragCameraMovement : MonoBehaviour
             }
             if (drag == true) {
                 Vector3 newCameraPos = Origin - Difference;
-                if( Input.GetKeyDown( KeyCode.U ) )
-                {
-                    int i = 5;
-                }
                 if( mainCam.ViewportToWorldPoint( new Vector3( 0.0f, 1.0f, 0.0f ) ).y > height )
                 {
                     newCameraPos.y = Mathf.Min( newCameraPos.y, mainCam.transform.position.y );
