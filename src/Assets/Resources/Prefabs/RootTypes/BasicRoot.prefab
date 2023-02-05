@@ -42,7 +42,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 6502692289256205315}
-  - component: {fileID: -3027114125838987649}
+  - component: {fileID: 3947190138934167415}
   m_Layer: 0
   m_Name: BasicRoot
   m_TagString: Untagged
@@ -66,7 +66,7 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &-3027114125838987649
+--- !u!114 &3947190138934167415
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -75,9 +75,14 @@ MonoBehaviour:
   m_GameObject: {fileID: 4337772714998171061}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f88161c2fe08a5a41bc5eadf1f992f2e, type: 3}
+  m_Script: {fileID: 11500000, guid: 0227c379e559a7b4b9885637ce23336a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  rootName: Basic Root
+  description: Basic root which has a start and end connection
+  waterCost: 10
+  foodCost: 10
+  icon: {fileID: 0}
 --- !u!1 &6672331987635647235
 GameObject:
   m_ObjectHideFlags: 0
@@ -88,7 +93,6 @@ GameObject:
   m_Component:
   - component: {fileID: 1719454555612912063}
   - component: {fileID: 8190871407264764088}
-  - component: {fileID: 2599503191173815997}
   - component: {fileID: 7119471164422632134}
   m_Layer: 0
   m_Name: Image
@@ -164,18 +168,6 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
---- !u!114 &2599503191173815997
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6672331987635647235}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f88161c2fe08a5a41bc5eadf1f992f2e, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!61 &7119471164422632134
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -189,7 +181,7 @@ BoxCollider2D:
   m_IsTrigger: 1
   m_UsedByEffector: 0
   m_UsedByComposite: 0
-  m_Offset: {x: 0.5, y: 0}
+  m_Offset: {x: 0.566565, y: 0}
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
     pivot: {x: 0, y: 0.5}
@@ -200,7 +192,7 @@ BoxCollider2D:
     adaptiveTiling: 0
   m_AutoTiling: 0
   serializedVersion: 2
-  m_Size: {x: 1, y: 1}
+  m_Size: {x: 0.86687005, y: 1}
   m_EdgeRadius: 0
 --- !u!1001 &2039916447700244819
 PrefabInstance:

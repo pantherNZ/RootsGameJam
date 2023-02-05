@@ -1,8 +1,10 @@
-﻿public class NutrientRoot : BaseRoot
+﻿using UnityEngine;
+
+public class NutrientRoot : BaseRoot
 {
     const float gatherTimeSec = 1.0f;
-    const int waterGain = 5;
-    const int nutrientGain = 5;
+    [SerializeField] int waterGain = 5;
+    [SerializeField] int nutrientGain = 5;
 
     private void Start()
     {
@@ -14,18 +16,11 @@
         Utility.FunctionTimer.StopTimer( "RootNutrient" + gameObject.GetInstanceID() );
     }
 
-    public override string GetName()
-    {
-        return "Nutrient Root";
-    }
-
-    public override string GetDescription()
-    {
-        return "Slowly gathers water and nutrients from the ground";
-    }
-
     private void GainResources()
     {
+        if( !isPlaced )
+            return;
+
         EventSystem.Instance.TriggerEvent( new GainResourcesEvent()
         {
             water = WaterToGain(),

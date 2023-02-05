@@ -28,7 +28,7 @@ public class PlayerController : EventReceiverInstance
     [SerializeField] GameObject gameUIRoot;
     [SerializeField] CanvasGroup mainMenuPanel;
     [SerializeField] GameObject rootSelectionUIContent;
-    [SerializeField] GameObject rootEntryUIPrefab;
+    [SerializeField] RootEntryUI rootEntryUIPrefab;
     [SerializeField] ValueBarUI waterBarUI;
     [SerializeField] ValueBarUI foodBarUI;
     [SerializeField] ValueBarUI healthBarUI;
@@ -62,16 +62,7 @@ public class PlayerController : EventReceiverInstance
         mainMenuLetters = FindObjectsOfType<MainMenuLetter>().ToList();
 
         ListenToConnections( rootConnections );
-
-        foreach( var type in rootTypes )
-        {
-            var entry = Instantiate( rootEntryUIPrefab, rootSelectionUIContent.transform );
-            var typeLocal = type;
-            entry.GetComponent<Button>().onClick.AddListener( () =>
-            {
-                RootUIOptionClicked( type );
-            } );
-        }
+        SetupRootTypeUIOptions();
 
         waterBarUI.SetValue( water, waterMax );
         foodBarUI.SetValue( nutrients, nutrientsMax );
@@ -91,13 +82,18 @@ public class PlayerController : EventReceiverInstance
 
     void ConnectionClicked( RootConnection connection )
     {
-        if( inMenu )
+        if( inMenu || newRoot != null || currentConnection != null )
             return;
 
         // Show UI
         rootSelectionUI.SetActive( true );
         ( rootSelectionUI.transform as RectTransform ).anchoredPosition = mainCamera.WorldToScreenPoint( connection.transform.position );
         currentConnection = connection;
+
+        foreach( Transform t in rootSelectionUIContent.transform )
+        {
+            t.GetComponent<RootEntryUI>().CheckEnabled( water, nutrients );
+        }
 
         InputPriority.Instance.Cancel( "rootSelectionUI" );
     }
@@ -126,8 +122,8 @@ public class PlayerController : EventReceiverInstance
     {;
         if( e is GainResourcesEvent gain )
         {
-            water += gain.water;
-            nutrients += gain.nutrients;
+            water = Mathf.Min( waterMax, water + gain.water );
+            nutrients = Mathf.Min( nutrientsMax, nutrients + gain.nutrients );
 
             waterBarUI.SetValue( water, waterMax );
             foodBarUI.SetValue( nutrients, nutrientsMax );
@@ -167,10 +163,7 @@ public class PlayerController : EventReceiverInstance
                 // Place
                 if( validPlacement && Input.GetMouseButtonDown( 0 ) )
                 {
-                    roots.Add( newRoot );
-                    ListenToConnections( newRoot.obj.GetComponentsInChildren<RootConnection>() );
-                    currentConnection.GetComponent<EventDispatcherV2>().OnPointerDownEvent.RemoveAllListeners();
-                    newRoot = null;
+                    ConfirmNewRoot();
                 }
                 // Cancel
                 else if( Input.GetMouseButtonDown( 1 ) )
@@ -191,6 +184,22 @@ public class PlayerController : EventReceiverInstance
                 } );
             }
         }
+    }
+
+    void ConfirmNewRoot()
+    {
+        var rootType = newRoot.obj.GetComponent<BaseRoot>();
+        water -= rootType.waterCost;
+        nutrients -= rootType.foodCost;
+
+        waterBarUI.SetValue( water, waterMax );
+        foodBarUI.SetValue( nutrients, nutrientsMax );
+
+        rootType.isPlaced = true;
+        roots.Add( newRoot );
+        ListenToConnections( newRoot.obj.GetComponentsInChildren<RootConnection>() );
+        currentConnection.GetComponent<EventDispatcherV2>().OnPointerDownEvent.RemoveAllListeners();
+        newRoot = null;
     }
 
     void HideMenu()
@@ -217,5 +226,43 @@ public class PlayerController : EventReceiverInstance
     {
         level = l;
         levelUI.text = l.ToString();
+    }
+
+    public void ShowLevelUpPopup()
+    {
+
+    }
+
+    public void LevelUp()
+    {
+        level++;
+        SetupRootTypeUIOptions();
+    }
+
+    public void SetupRootTypeUIOptions()
+    {
+        foreach( Transform t in rootSelectionUIContent.transform )
+            t.DestroyGameObject();
+
+        rootSelectionUIContent.transform.DetachChildren();
+
+        foreach( var type in rootTypes )
+        {
+            if( level < type.requiredLevel )
+                continue;
+
+            var entry = Instantiate( rootEntryUIPrefab.gameObject, rootSelectionUIContent.transform );
+            entry.GetComponent<RootEntryUI>().SetData( type );
+            var typeLocal = type;
+            entry.GetComponent<Button>().onClick.AddListener( () =>
+            {
+                RootUIOptionClicked( type );
+            } );
+        }
+    }
+
+    public int GetLevelUpCost()
+    {
+        return Mathf.RoundToInt( Mathf.Pow( level, 1.5f ) * 100.0f );
     }
 }
