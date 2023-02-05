@@ -17,10 +17,8 @@ public class Root
 public class PlayerController : EventReceiverInstance
 {
     // Resources
-    [SerializeField] int nutrients;
-    [SerializeField] int nutrientsMax;
-    [SerializeField] int water;
-    [SerializeField] int waterMax;
+    [SerializeField] Resource currentResource;
+    [SerializeField] Resource maxResource;
     [SerializeField] int level;
     [SerializeField] bool canPlaceRoots;
     [SerializeField] List<BaseRoot> rootTypes;
@@ -38,7 +36,7 @@ public class PlayerController : EventReceiverInstance
     [SerializeField] float rootScale = 1.0f;
     public bool inMenu = true;
     [SerializeField] Color invalidPlacementColour = Color.red;
-    [SerializeField] float rootMaxAngleDegrees = 150.0f;
+    [SerializeField] GameConstants gameConstants;
 
     private Camera mainCamera;
     private List<MainMenuLetter> mainMenuLetters = new List<MainMenuLetter>();
@@ -46,6 +44,7 @@ public class PlayerController : EventReceiverInstance
 
     private List<Root> roots = new List<Root>();
     public Root newRoot;
+    private Color levelUpUIColour;
 
     protected override void Start()
     {
@@ -56,7 +55,10 @@ public class PlayerController : EventReceiverInstance
         gameUIRoot.SetActive( !inMenu );
         rootSelectionUI.SetActive( !inMenu );
         mainMenuPanel.gameObject.SetActive( inMenu );
-        ChangeLevel( 1 );
+        ChangeLevel( 0 );
+
+        currentResource = gameConstants.startingResource;
+        maxResource = gameConstants.startingMaxResource;
 
         // Find root connections and list to their click event
         var rootConnections = FindObjectsOfType<RootConnection>();
@@ -65,9 +67,10 @@ public class PlayerController : EventReceiverInstance
         ListenToConnections( rootConnections );
         SetupRootTypeUIOptions();
 
-        waterBarUI.SetValue( water, waterMax );
-        foodBarUI.SetValue( nutrients, nutrientsMax );
+        waterBarUI.SetValue( currentResource.water, maxResource.water );
+        foodBarUI.SetValue( currentResource.food, maxResource.food );
 
+        levelUpUIColour = levelUpUI.GetComponentInChildren<Image>().color;
         ShowLevelUpPopup( false );
     }
 
@@ -95,7 +98,7 @@ public class PlayerController : EventReceiverInstance
 
         foreach( Transform t in rootSelectionUIContent.transform )
         {
-            t.GetComponent<RootEntryUI>().CheckEnabled( water, nutrients );
+            t.GetComponent<RootEntryUI>().CheckEnabled( currentResource.water, currentResource.food );
         }
 
         InputPriority.Instance.Cancel( "rootSelectionUI" );
@@ -125,20 +128,32 @@ public class PlayerController : EventReceiverInstance
     {;
         if( e is GainResourcesEvent gain )
         {
-            water = Mathf.Min( waterMax, water + gain.water );
-            nutrients = Mathf.Min( nutrientsMax, nutrients + gain.nutrients );
+            currentResource.water = Mathf.Min( maxResource.water, currentResource.water + gain.water );
+            currentResource.food = Mathf.Min( maxResource.food, currentResource.food + gain.nutrients );
+            UpdateBars();
 
-            waterBarUI.SetValue( water, waterMax );
-            foodBarUI.SetValue( nutrients, nutrientsMax );
+
+            if( currentConnection != null )
+            {
+                foreach( Transform t in rootSelectionUIContent.transform )
+                {
+                    t.GetComponent<RootEntryUI>().CheckEnabled( currentResource.water, currentResource.food );
+                }
+            }
         }
         else if( e is ModifyStorageEvent modify )
         {
-            waterMax += modify.water;
-            nutrientsMax += modify.nutrients;
-
-            waterBarUI.SetValue( water, waterMax );
-            foodBarUI.SetValue( nutrients, nutrientsMax );
+            maxResource.water += modify.water;
+            maxResource.food += modify.nutrients;
+            UpdateBars();
+            ShowLevelUpPopup( levelUpUI.activeSelf );
         }
+    }
+
+    void UpdateBars()
+    {
+        waterBarUI.SetValue( currentResource.water, maxResource.water );
+        foodBarUI.SetValue( currentResource.food, maxResource.food );
     }
 
     void Update()
@@ -162,8 +177,9 @@ public class PlayerController : EventReceiverInstance
                 List<Collider2D> colliderList = new List<Collider2D>();
                 bool isFirstConnection = currentConnection.parent == null;
                 newRoot.collision.OverlapCollider( new ContactFilter2D().NoFilter(), colliderList );
-                bool validPlacement = Vector3.Angle( direction, currentConnection.transform.right ) <= rootMaxAngleDegrees / 2.0f
-                    && colliderList.All( x =>
+                bool validPlacement = ( Vector3.Angle( direction, currentConnection.transform.right ) <= currentConnection.rootMaxAngleDegrees / 2.0f ) ||
+                    ( currentConnection.allowBackwards && Vector3.Angle( direction, -currentConnection.transform.right ) > currentConnection.rootMaxAngleDegrees / 2.0f ) &&
+                    colliderList.All( x =>
                     {
                         return x.GetComponent<RootConnection>() != null ||
                             ( isFirstConnection && x.GetComponent<Tree>() != null );
@@ -200,11 +216,11 @@ public class PlayerController : EventReceiverInstance
     void ConfirmNewRoot()
     {
         var rootType = newRoot.obj.GetComponent<BaseRoot>();
-        water -= rootType.waterCost;
-        nutrients -= rootType.foodCost;
+        currentResource.water -= rootType.waterCost;
+        currentResource.food -= rootType.foodCost;
 
-        waterBarUI.SetValue( water, waterMax );
-        foodBarUI.SetValue( nutrients, nutrientsMax );
+        waterBarUI.SetValue( currentResource.water, maxResource.food );
+        foodBarUI.SetValue( currentResource.food, maxResource.food );
 
         rootType.isPlaced = true;
         rootType.OnPlacement();
@@ -237,21 +253,37 @@ public class PlayerController : EventReceiverInstance
     void ChangeLevel( int l )
     {
         level = l;
-        levelUI.text = l.ToString();
+        levelUI.text = ( l + 1 ).ToString();
     }
 
     public void ShowLevelUpPopup( bool show )
     {
         levelUpUI.SetActive( show && !inMenu );
         var texts = levelUpUI.GetComponentsInChildren<TMPro.TextMeshProUGUI>();
-        texts[0].text = string.Format( "Next Tree Age: {0}\nCost: ", level + 1 );
-        texts[1].text = texts[2].text = GetLevelUpCost().ToString();
+        texts[0].text = string.Format( "Next Tree Age: {0}\nCost: ", level + 2 );
+        texts[1].text = GetLevelUpCost().water.ToString();
+        texts[2].text = GetLevelUpCost().food.ToString();
+        levelUpUI.GetComponentInChildren<Image>().color = CanLevelUp() ? levelUpUIColour : invalidPlacementColour;
+    }
+
+    private bool CanLevelUp()
+    {
+        return currentResource.water >= GetLevelUpCost().water && 
+            currentResource.food >= GetLevelUpCost().food;
     }
 
     public void LevelUp()
     {
-        level++;
+        if( !CanLevelUp() )
+            return;
+
+        currentResource.food -= GetLevelUpCost().food;
+        currentResource.water -= GetLevelUpCost().water;
+        UpdateBars();
+
+        ChangeLevel( level + 1 );
         SetupRootTypeUIOptions();
+        ShowLevelUpPopup( false );
     }
 
     public void SetupRootTypeUIOptions()
@@ -276,8 +308,8 @@ public class PlayerController : EventReceiverInstance
         }
     }
 
-    public int GetLevelUpCost()
+    public Resource GetLevelUpCost()
     {
-        return Mathf.RoundToInt( Mathf.Pow( level, 1.5f ) * 100.0f );
+        return gameConstants.levelCosts[level];
     }
 }

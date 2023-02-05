@@ -1,0 +1,55 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4871bd1d0a8daf0499d76f9a8828e2c1, type: 3}
+  m_Name: GameConstants
+  m_EditorClassIdentifier: 
+  levelCosts:
+  - food: 100
+    water: 100
+  - food: 200
+    water: 200
+  - food: 350
+    water: 500
+  - food: 1000
+    water: 1000
+  - food: 2000
+    water: 6000
+  - food: 10000
+    water: 10000
+  - food: 20000
+    water: 15000
+  - food: 25000
+    water: 25000
+  - food: 50000
+    water: 100000
+  - food: 100000
+    water: 200000
+  - food: 250000
+    water: 0
+  - food: 500000
+    water: 500000
+  - food: 1000000
+    water: 1000000
+  - food: 10000000
+    water: 10000000
+  - food: 100000000
+    water: 100000000
+  - food: 1000000000
+    water: 1000000000
+  - food: 2147483647
+    water: 2147483647
+  startingResource:
+    food: 50
+    water: 50
+  startingMaxResource:
+    food: 100
+    water: 100

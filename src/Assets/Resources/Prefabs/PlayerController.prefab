@@ -47,10 +47,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4283b24037d6e364b9b3d3e54ba15dc1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  nutrients: 50
-  nutrientsMax: 100
-  water: 50
-  waterMax: 100
+  currentResource:
+    food: 0
+    water: 0
+  maxResource:
+    food: 0
+    water: 0
   level: 1
   canPlaceRoots: 1
   rootTypes:
@@ -70,7 +72,7 @@ MonoBehaviour:
   rootScale: 1
   inMenu: 0
   invalidPlacementColour: {r: 1, g: 0, b: 0, a: 1}
-  rootMaxAngleDegrees: 150
+  gameConstants: {fileID: 11400000, guid: 1f4ece51d5794c84d835b723f4a48cec, type: 2}
 --- !u!114 &5653337866022337843
 MonoBehaviour:
   m_ObjectHideFlags: 0
