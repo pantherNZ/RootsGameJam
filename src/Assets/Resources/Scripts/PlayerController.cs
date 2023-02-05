@@ -271,8 +271,8 @@ public class PlayerController : EventReceiverInstance
         levelUpUI.SetActive( show && !inMenu );
         var texts = levelUpUI.GetComponentsInChildren<TMPro.TextMeshProUGUI>();
         texts[0].text = string.Format( "Next Tree Age: {0}\nCost: ", level + 2 );
-        texts[1].text = GetLevelUpCost().water.ToString();
-        texts[2].text = GetLevelUpCost().food.ToString();
+        texts[1].text = GetLevelUpCost().food.ToString();
+        texts[2].text = GetLevelUpCost().water.ToString();
         levelUpUI.GetComponentInChildren<Image>().color = CanLevelUp() ? levelUpUIColour : invalidPlacementColour;
     }
 
