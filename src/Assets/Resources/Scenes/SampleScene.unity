@@ -247,6 +247,7 @@ GameObject:
   m_Component:
   - component: {fileID: 137692253}
   - component: {fileID: 137692252}
+  - component: {fileID: 137692254}
   m_Layer: 0
   m_Name: PlayerController
   m_TagString: Untagged
@@ -286,7 +287,9 @@ MonoBehaviour:
   levelUI: {fileID: 577198086}
   menuFadeOutTime: 1
   rootScale: 1
-  inMenu: 1
+  inMenu: 0
+  invalidPlacementColour: {r: 1, g: 0, b: 0, a: 1}
+  rootMaxAngleDegrees: 150
 --- !u!4 &137692253
 Transform:
   m_ObjectHideFlags: 0
@@ -303,6 +306,18 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &137692254
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 137692251}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 345a0eb63f503c74a97d9493060edde3, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &219844019
 GameObject:
   m_ObjectHideFlags: 0
@@ -974,6 +989,7 @@ GameObject:
   - component: {fileID: 519420031}
   - component: {fileID: 519420029}
   - component: {fileID: 519420033}
+  - component: {fileID: 519420034}
   m_Layer: 0
   m_Name: Main Camera
   m_TagString: MainCamera
@@ -1063,6 +1079,21 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 4294967295
   m_MaxRayIntersections: 0
+--- !u!114 &519420034
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 519420028}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 157152b9d5d001a41a7a013c1db02dea, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  controller: {fileID: 137692252}
+  ResetCamera: {x: 0, y: 0, z: -5}
+  ScrollSpeed: 10
 --- !u!1 &523474494
 GameObject:
   m_ObjectHideFlags: 0
@@ -1794,7 +1825,7 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 1615519961}
   m_HandleRect: {fileID: 1615519960}
   m_Direction: 2
-  m_Value: 1
+  m_Value: 1.0000004
   m_Size: 0.5809826
   m_NumberOfSteps: 0
   m_OnValueChanged:

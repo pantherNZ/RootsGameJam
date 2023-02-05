@@ -44,7 +44,7 @@ public class PlayerController : EventReceiverInstance
     private RootConnection currentConnection;
 
     private List<Root> roots = new List<Root>();
-    private Root newRoot;
+    public Root newRoot;
 
     protected override void Start()
     {
