@@ -10,4 +10,6 @@ public class BaseRoot : MonoBehaviour
     [HideInInspector]
     public bool isPlaced;
     public int requiredLevel;
+
+    public virtual void OnPlacement() { }
 }

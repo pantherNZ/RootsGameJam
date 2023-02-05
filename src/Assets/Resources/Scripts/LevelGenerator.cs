@@ -13,7 +13,7 @@ public class LevelGenerator : MonoBehaviour
 
     private void Start()
     {
-        float height = Camera.main.ViewportToWorldPoint( new Vector3( 0.0f, 1.0f, 0.0f ) ).y- dirtTileSize / 2.0f;
+        float height = Camera.main.ViewportToWorldPoint( new Vector3( 0.0f, 1.0f, 0.0f ) ).y - dirtTileSize / 2.0f;
 
         for( int y = -1; y <= 1; y++ )
         {

@@ -15,40 +15,42 @@ public class DragCameraMovement : MonoBehaviour
     private bool drag = false;
     private float height;
     public float ScrollSpeed = 2f;
-
+    private Camera mainCam;
 
     void Start(){
-        height = Camera.main.ViewportToWorldPoint( new Vector3( 0.0f, 1.0f, 0.0f ) ).y;
+        mainCam = Camera.main;
+        height = mainCam.ViewportToWorldPoint( new Vector3( 0.0f, 1.0f, 0.0f ) ).y;
     }
 
-
-    void Update(){
-        float ScreenSize = Camera.main.orthographicSize + Input.mouseScrollDelta.y * ScrollSpeed;
-        if (ScreenSize >= 15 || ScreenSize <= 3) return;
-        else{
-            Camera.main.orthographicSize += Input.mouseScrollDelta.y * ScrollSpeed;
-        }
+    void Update() {
+        float currentScreenTop = mainCam.ViewportToWorldPoint( new Vector3( 0.0f, 1.0f, 0.0f ) ).y;
+        float maxSize = currentScreenTop > height ? mainCam.orthographicSize : 15.0f;
+        mainCam.orthographicSize = Mathf.Clamp( mainCam.orthographicSize - Input.mouseScrollDelta.y * ScrollSpeed, 3.0f, maxSize );
 
         InputPriority.Instance.Request( () => Input.GetMouseButton( 0 ), "rootSelectionUI", -1, () => {
             if (controller.newRoot != null) return;
-            Difference = (Camera.main.ScreenToWorldPoint(Input.mousePosition)) - Camera.main.transform.position;
-            if (drag == false){
+            Difference = (mainCam.ScreenToWorldPoint(Input.mousePosition)) - mainCam.transform.position;
+            if (drag == false) {
                 drag = true;
-                Origin = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+                Origin = mainCam.ScreenToWorldPoint(Input.mousePosition);
             }
             if (drag == true) {
                 Vector3 newCameraPos = Origin - Difference;
-                if (newCameraPos.y >= height){
-                    return;
+                if( mainCam.ViewportToWorldPoint( new Vector3( 0.0f, 1.0f, 0.0f ) ).y > height )
+                {
+                    newCameraPos.y = Mathf.Min( newCameraPos.y, mainCam.transform.position.y );
+                    Origin = mainCam.ScreenToWorldPoint( Input.mousePosition );
                 }
-                Camera.main.transform.position = Origin - Difference;
+                mainCam.transform.position = newCameraPos;
             }
         });
         if (!Input.GetMouseButton( 0 )){
             drag = false;
         }
-        if(Input.GetKey("space")) {
-            Camera.main.transform.position = ResetCamera;
+        if( Input.GetKeyDown( KeyCode.Space ) )
+        {
+            mainCam.transform.position = ResetCamera;
+            mainCam.orthographicSize = 5.0f;
         }
     }
     
