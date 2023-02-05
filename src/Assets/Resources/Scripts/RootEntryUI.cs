@@ -12,10 +12,10 @@ public class RootEntryUI : MonoBehaviour
 
     public void SetData( BaseRoot info )
     {
-        nameText.text = info.name;
-        descText.text = info.name;
+        nameText.text = info.rootName;
+        descText.text = info.description;
         costWaterText.text = info.waterCost.ToString();
-        costFoodText.text = info.waterCost.ToString();
+        costFoodText.text = info.foodCost.ToString();
         image.sprite = info.icon != null ? Utility.CreateSprite( info.icon ) : null;
         this.info = info;
     }

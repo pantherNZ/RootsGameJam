@@ -85,7 +85,7 @@ MonoBehaviour:
   foodCost: 50
   icon: {fileID: 0}
   isPlaced: 0
-  requiredLevel: 2
+  requiredLevel: 1
 --- !u!1 &6672331987635647235
 GameObject:
   m_ObjectHideFlags: 0

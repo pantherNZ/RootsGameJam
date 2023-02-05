@@ -51,7 +51,7 @@ MonoBehaviour:
   foodCost: 60
   icon: {fileID: 0}
   isPlaced: 0
-  requiredLevel: 2
+  requiredLevel: 1
   waterStorage: 100
   nutrientStroage: 100
 --- !u!1 &5874525479893708746
