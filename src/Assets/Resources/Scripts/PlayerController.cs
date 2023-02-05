@@ -179,7 +179,9 @@ public class PlayerController : EventReceiverInstance
                     ( currentConnection.allowBackwards && Vector3.Angle( direction, -currentConnection.transform.right ) > currentConnection.rootMaxAngleDegrees / 2.0f ) ) &&
                     colliderList.All( x =>
                     {
-                        return x.GetComponent<RootConnection>() != null ||
+                        return x.gameObject == newRoot.obj ||
+                            x.transform.IsChildOf( newRoot.obj.transform ) ||
+                            x.GetComponent<RootConnection>() != null ||
                             ( isFirstConnection && x.GetComponent<Tree>() != null );
                     } );
 
