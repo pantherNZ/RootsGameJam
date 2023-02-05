@@ -14,7 +14,7 @@ public class DragCameraMovement : MonoBehaviour
     private Vector3 ResetCamera;
     private bool drag = false;
     private float height;
-    public float ScrollSpeed = 10f;
+    public float ScrollSpeed = 2f;
 
 
     void Start(){
@@ -23,19 +23,22 @@ public class DragCameraMovement : MonoBehaviour
 
 
     void Update(){
-
-        Camera.main.transform.Translate(0,0,Input.GetAxis("Mouse Scrollwheel") * ScrollSpeed);
+        float ScreenSize = Camera.main.orthographicSize + Input.mouseScrollDelta.y * ScrollSpeed;
+        if (ScreenSize >= 15 || ScreenSize <= 3) return;
+        else{
+            Camera.main.orthographicSize += Input.mouseScrollDelta.y * ScrollSpeed;
+        }
 
         InputPriority.Instance.Request( () => Input.GetMouseButton( 0 ), "rootSelectionUI", -1, () => {
             if (controller.newRoot != null) return;
-            Difference = (Camera.main.ScreenToViewportPoint(Input.mousePosition)) - Camera.main.transform.position;
+            Difference = (Camera.main.ScreenToWorldPoint(Input.mousePosition)) - Camera.main.transform.position;
             if (drag == false){
                 drag = true;
-                Origin = Camera.main.ScreenToViewportPoint(Input.mousePosition);
+                Origin = Camera.main.ScreenToWorldPoint(Input.mousePosition);
             }
             if (drag == true) {
-                // Debug.Log("Working");
-                if (Origin.y - Difference.y >= height){
+                Vector3 newCameraPos = Origin - Difference;
+                if (newCameraPos.y >= height){
                     return;
                 }
                 Camera.main.transform.position = Origin - Difference;
