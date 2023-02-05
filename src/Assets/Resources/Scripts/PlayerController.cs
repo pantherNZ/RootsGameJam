@@ -175,9 +175,10 @@ public class PlayerController : EventReceiverInstance
                 List<Collider2D> colliderList = new List<Collider2D>();
                 bool isFirstConnection = currentConnection.parent == null;
                 newRoot.collision.OverlapCollider( new ContactFilter2D().NoFilter(), colliderList );
-                bool validPlacement = ( Vector3.Angle( direction, currentConnection.transform.right ) <= currentConnection.rootMaxAngleDegrees / 2.0f ||
-                    ( currentConnection.allowBackwards && Vector3.Angle( direction, -currentConnection.transform.right ) > currentConnection.rootMaxAngleDegrees / 2.0f ) ) &&
-                    colliderList.All( x =>
+                //bool validAngle = ( Vector3.Angle( direction, currentConnection.transform.right ) <= currentConnection.rootMaxAngleDegrees / 2.0f ||
+                //    ( currentConnection.allowBackwards && Vector3.Angle( direction, -currentConnection.transform.right ) > currentConnection.rootMaxAngleDegrees / 2.0f ) );
+                bool validAngle = true;
+                bool validCollision = colliderList.All( x =>
                     {
                         return x.gameObject == newRoot.obj ||
                             x.transform.IsChildOf( newRoot.obj.transform ) ||
@@ -185,6 +186,7 @@ public class PlayerController : EventReceiverInstance
                             ( isFirstConnection && x.GetComponent<Tree>() != null );
                     } );
 
+                bool validPlacement = validCollision && validAngle;
                 newRoot.sprite.color = validPlacement ? newRoot.baseCol : invalidPlacementColour;
 
                 // Place
