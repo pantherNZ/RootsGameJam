@@ -2,7 +2,7 @@
 {
     const float gatherTimeSec = 1.0f;
     const int waterGain = 5;
-    const int nutrientGain = 1;
+    const int nutrientGain = 5;
 
     private void Start()
     {

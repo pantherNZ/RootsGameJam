@@ -6,9 +6,12 @@ using UnityEngine.UI;
 
 public class Root
 {
-    public GameObject sprite;
+    public GameObject obj;
+    public SpriteRenderer sprite;
+    public Collider2D collision;
     public List<Root> children = new List<Root>();
     public Root parent;
+    public Color baseCol;
 }
 
 public class PlayerController : EventReceiverInstance
@@ -33,6 +36,8 @@ public class PlayerController : EventReceiverInstance
     [SerializeField] float menuFadeOutTime = 1.0f;
     [SerializeField] float rootScale = 1.0f;
     [SerializeField] bool inMenu = true;
+    [SerializeField] Color invalidPlacementColour = Color.red;
+    [SerializeField] float rootMaxAngleDegrees = 150.0f;
 
     private Camera mainCamera;
     private List<MainMenuLetter> mainMenuLetters = new List<MainMenuLetter>();
@@ -93,20 +98,28 @@ public class PlayerController : EventReceiverInstance
         rootSelectionUI.SetActive( true );
         ( rootSelectionUI.transform as RectTransform ).anchoredPosition = mainCamera.WorldToScreenPoint( connection.transform.position );
         currentConnection = connection;
+
+        InputPriority.Instance.Cancel( "rootSelectionUI" );
     }
 
     void RootUIOptionClicked( BaseRoot rootType )
     {
         rootSelectionUI.SetActive( false );
 
+        var rootObj = Instantiate( rootType, currentConnection.transform );
+
         newRoot = new Root()
         {
-            sprite = Instantiate( rootType, currentConnection.transform ).gameObject,
+            obj = rootObj.gameObject,
+            sprite = rootObj.GetComponentInChildren<SpriteRenderer>(),
+            collision = rootObj.GetComponentInChildren<Collider2D>(),
             parent = currentConnection.parent,
         };
 
-        newRoot.sprite.transform.localPosition = new Vector3();
-        newRoot.sprite.transform.localScale = new Vector3( rootScale, rootScale, rootScale );
+        newRoot.baseCol = newRoot.sprite.color;
+
+        newRoot.obj.transform.localPosition = new Vector3();
+        newRoot.obj.transform.localScale = new Vector3( rootScale, rootScale, rootScale );
     }
 
     public override void OnEventReceived( IBaseEvent e )
@@ -135,23 +148,47 @@ public class PlayerController : EventReceiverInstance
             if( newRoot != null )
             {
                 var mousePos = mainCamera.ScreenToWorldPoint( Utility.GetMouseOrTouchPos() );
-                var direction = ( mousePos - currentConnection.transform.position ).normalized;
-                newRoot.sprite.transform.localRotation = Quaternion.Euler( 0.0f, 0.0f, -direction.ToVector2().Angle() + 90.0f );
+                var direction = ( mousePos - currentConnection.transform.position ).normalized.ToVector2();
+                newRoot.obj.transform.rotation = Quaternion.Euler( 0.0f, 0.0f, -direction.Angle() + 90.0f );
+
+                // Collision and angle check
+                List<Collider2D> colliderList = new List<Collider2D>();
+                bool isFirstConnection = currentConnection.parent == null;
+                newRoot.collision.OverlapCollider( new ContactFilter2D().NoFilter(), colliderList );
+                bool validPlacement = Vector3.Angle( direction, currentConnection.transform.right ) <= rootMaxAngleDegrees / 2.0f
+                    && colliderList.All( x =>
+                    {
+                        return x.GetComponent<RootConnection>() != null ||
+                            ( isFirstConnection && x.GetComponent<Tree>() != null );
+                    } );
+
+                newRoot.sprite.color = validPlacement ? newRoot.baseCol : invalidPlacementColour;
 
                 // Place
-                if( Input.GetMouseButtonDown( 0 ) )
+                if( validPlacement && Input.GetMouseButtonDown( 0 ) )
                 {
                     roots.Add( newRoot );
-                    ListenToConnections( newRoot.sprite.GetComponentsInChildren<RootConnection>() );
+                    ListenToConnections( newRoot.obj.GetComponentsInChildren<RootConnection>() );
                     currentConnection.GetComponent<EventDispatcherV2>().OnPointerDownEvent.RemoveAllListeners();
                     newRoot = null;
                 }
                 // Cancel
-                else if( Input.GetMouseButtonDown( 2 ) )
+                else if( Input.GetMouseButtonDown( 1 ) )
                 {
-                    newRoot.sprite.Destroy();
+                    newRoot.obj.Destroy();
                     newRoot = null;
                 }
+            }
+            else if( currentConnection != null )
+            {
+                InputPriority.Instance.Request( () => Input.GetMouseButtonDown( 0 ) || Input.GetMouseButtonDown( 1 ), "rootSelectionUI", 0, () =>
+                {
+                    if( Input.GetMouseButtonDown( 1 ) || !Utility.IsPointerOverGameObject( rootSelectionUI ) )
+                    {
+                        currentConnection = null;
+                        rootSelectionUI.SetActive( false );
+                    }
+                } );
             }
         }
     }
