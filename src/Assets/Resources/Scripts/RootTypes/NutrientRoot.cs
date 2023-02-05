@@ -2,11 +2,11 @@
 
 public class NutrientRoot : BaseRoot
 {
-    const float gatherTimeSec = 1.0f;
+    [SerializeField] float gatherTimeSec = 1.0f;
     [SerializeField] int waterGain = 5;
     [SerializeField] int nutrientGain = 5;
 
-    private void Start()
+    public override void OnPlacement()
     {
         Utility.FunctionTimer.CreateTimer( gatherTimeSec, GainResources, "RootNutrient" + gameObject.GetInstanceID(), true );
     }
@@ -18,9 +18,6 @@ public class NutrientRoot : BaseRoot
 
     private void GainResources()
     {
-        if( !isPlaced )
-            return;
-
         EventSystem.Instance.TriggerEvent( new GainResourcesEvent()
         {
             water = WaterToGain(),

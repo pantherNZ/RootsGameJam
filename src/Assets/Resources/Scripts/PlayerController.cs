@@ -129,6 +129,14 @@ public class PlayerController : EventReceiverInstance
             waterBarUI.SetValue( water, waterMax );
             foodBarUI.SetValue( nutrients, nutrientsMax );
         }
+        else if( e is ModifyStorageEvent modify )
+        {
+            waterMax += modify.water;
+            nutrientsMax += modify.nutrients;
+
+            waterBarUI.SetValue( water, waterMax );
+            foodBarUI.SetValue( nutrients, nutrientsMax );
+        }
     }
 
     void Update()
@@ -197,6 +205,7 @@ public class PlayerController : EventReceiverInstance
         foodBarUI.SetValue( nutrients, nutrientsMax );
 
         rootType.isPlaced = true;
+        rootType.OnPlacement();
         roots.Add( newRoot );
         ListenToConnections( newRoot.obj.GetComponentsInChildren<RootConnection>() );
         currentConnection.GetComponent<EventDispatcherV2>().OnPointerDownEvent.RemoveAllListeners();
