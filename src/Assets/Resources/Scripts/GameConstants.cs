@@ -17,4 +17,5 @@ public class GameConstants : ScriptableObject
     public List<Resource> levelCosts;
     public Resource startingResource;
     public Resource startingMaxResource;
+    public List<BaseRoot> rootTypes;
 }

@@ -11,7 +11,6 @@ GameObject:
   - component: {fileID: 5653337866022337840}
   - component: {fileID: 5653337866022337841}
   - component: {fileID: 5653337866022337843}
-  - component: {fileID: 5653337866022337842}
   m_Layer: 0
   m_Name: PlayerController
   m_TagString: Untagged
@@ -72,7 +71,7 @@ MonoBehaviour:
   rootScale: 1
   inMenu: 0
   invalidPlacementColour: {r: 1, g: 0, b: 0, a: 1}
-  gameConstants: {fileID: 11400000, guid: 1f4ece51d5794c84d835b723f4a48cec, type: 2}
+  gameConstants: {fileID: 0}
 --- !u!114 &5653337866022337843
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -83,18 +82,6 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 345a0eb63f503c74a97d9493060edde3, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
---- !u!114 &5653337866022337842
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5653337866022337846}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: dae074afbaf0baf45977d1bf491278cc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
 --- !u!1 &5653337866320085265

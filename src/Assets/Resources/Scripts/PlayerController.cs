@@ -19,9 +19,7 @@ public class PlayerController : EventReceiverInstance
     // Resources
     [SerializeField] Resource currentResource;
     [SerializeField] Resource maxResource;
-    [SerializeField] int level;
-    [SerializeField] bool canPlaceRoots;
-    [SerializeField] List<BaseRoot> rootTypes;
+    int level;
     [SerializeField] GameObject rootSelectionUI;
     [SerializeField] GameObject gameUIRoot;
     [SerializeField] CanvasGroup mainMenuPanel;
@@ -177,8 +175,8 @@ public class PlayerController : EventReceiverInstance
                 List<Collider2D> colliderList = new List<Collider2D>();
                 bool isFirstConnection = currentConnection.parent == null;
                 newRoot.collision.OverlapCollider( new ContactFilter2D().NoFilter(), colliderList );
-                bool validPlacement = ( Vector3.Angle( direction, currentConnection.transform.right ) <= currentConnection.rootMaxAngleDegrees / 2.0f ) ||
-                    ( currentConnection.allowBackwards && Vector3.Angle( direction, -currentConnection.transform.right ) > currentConnection.rootMaxAngleDegrees / 2.0f ) &&
+                bool validPlacement = ( Vector3.Angle( direction, currentConnection.transform.right ) <= currentConnection.rootMaxAngleDegrees / 2.0f ||
+                    ( currentConnection.allowBackwards && Vector3.Angle( direction, -currentConnection.transform.right ) > currentConnection.rootMaxAngleDegrees / 2.0f ) ) &&
                     colliderList.All( x =>
                     {
                         return x.GetComponent<RootConnection>() != null ||
@@ -197,6 +195,7 @@ public class PlayerController : EventReceiverInstance
                 {
                     newRoot.obj.Destroy();
                     newRoot = null;
+                    currentConnection = null;
                 }
             }
             else if( currentConnection != null )
@@ -225,9 +224,16 @@ public class PlayerController : EventReceiverInstance
         rootType.isPlaced = true;
         rootType.OnPlacement();
         roots.Add( newRoot );
-        ListenToConnections( newRoot.obj.GetComponentsInChildren<RootConnection>() );
-        currentConnection.GetComponent<EventDispatcherV2>().OnPointerDownEvent.RemoveAllListeners();
+        var newConnections = newRoot.obj.GetComponentsInChildren<RootConnection>();
+        ListenToConnections( newConnections );
+
+        foreach( var connection in newConnections )
+            connection.parent = newRoot;
+
+        if( --currentConnection.numConnectionsAllowed == 0 )
+            currentConnection.GetComponent<EventDispatcherV2>().OnPointerDownEvent.RemoveAllListeners();
         newRoot = null;
+        currentConnection = null;
     }
 
     void HideMenu()
@@ -293,7 +299,7 @@ public class PlayerController : EventReceiverInstance
 
         rootSelectionUIContent.transform.DetachChildren();
 
-        foreach( var type in rootTypes )
+        foreach( var type in gameConstants.rootTypes )
         {
             if( level < type.requiredLevel )
                 continue;

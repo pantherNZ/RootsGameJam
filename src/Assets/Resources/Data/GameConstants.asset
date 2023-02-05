@@ -53,3 +53,8 @@ MonoBehaviour:
   startingMaxResource:
     food: 100
     water: 100
+  rootTypes:
+  - {fileID: 3947190138934167415, guid: 2d0dc9d3013398d47bccda1a4ff8fbd1, type: 3}
+  - {fileID: 9092125598873235104, guid: 2a206ce79abd7344abb779469868a8a7, type: 3}
+  - {fileID: 6669641805014024086, guid: 14b2037a48fb8e24387798a2e5d558a6, type: 3}
+  - {fileID: 3947190138934167415, guid: 4c946b275ee2d8c4bb5defa38a3b3412, type: 3}
