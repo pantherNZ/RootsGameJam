@@ -10,7 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 8814786395553393189}
   - component: {fileID: 67648572287298688}
-  - component: {fileID: 4299731968023380699}
+  - component: {fileID: 9085765275355628120}
   m_Layer: 0
   m_Name: Sprite
   m_TagString: Untagged
@@ -27,7 +27,7 @@ Transform:
   m_GameObject: {fileID: 1163813916397272479}
   m_LocalRotation: {x: -0, y: -0, z: 0.7071068, w: 0.7071068}
   m_LocalPosition: {x: 1.081, y: 0.026, z: 0}
-  m_LocalScale: {x: 4.730474, y: 4.9543457, z: 3.1709843}
+  m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 5973739526139173820}
@@ -74,7 +74,7 @@ SpriteRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
-  m_Sprite: {fileID: -762065847, guid: e25f024c7246f3b4c8711812ec556638, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 3d3a228147ebb174d85f0bccba43f4f9, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -85,7 +85,7 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
---- !u!61 &4299731968023380699
+--- !u!61 &9085765275355628120
 BoxCollider2D:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -95,21 +95,21 @@ BoxCollider2D:
   m_Enabled: 1
   m_Density: 1
   m_Material: {fileID: 0}
-  m_IsTrigger: 1
+  m_IsTrigger: 0
   m_UsedByEffector: 0
   m_UsedByComposite: 0
-  m_Offset: {x: 0, y: -0.06087318}
+  m_Offset: {x: -0.022914946, y: -0.17677295}
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
     pivot: {x: 0.5, y: 0.5}
-    oldSize: {x: 0.195, y: 0.453}
+    oldSize: {x: 2.34, y: 3.4}
     newSize: {x: 0.195, y: 0.453}
     adaptiveTilingThreshold: 0.5
     drawMode: 0
     adaptiveTiling: 0
   m_AutoTiling: 0
   serializedVersion: 2
-  m_Size: {x: 0.195, y: 0.33125365}
+  m_Size: {x: 0.9323633, y: 3.0464542}
   m_EdgeRadius: 0
 --- !u!1 &4183843479226808576
 GameObject:
@@ -233,7 +233,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6502692289256205315, guid: b25eaeb96a74dfe4fa9cdbcd068d00df, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 1.97
+      value: 2.533
       objectReference: {fileID: 0}
     - target: {fileID: 6502692289256205315, guid: b25eaeb96a74dfe4fa9cdbcd068d00df, type: 3}
       propertyPath: m_LocalPosition.y

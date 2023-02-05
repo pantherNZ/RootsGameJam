@@ -23,6 +23,9 @@ public class DragCameraMovement : MonoBehaviour
     }
 
     void Update() {
+        if( controller.inMenu )
+            return;
+
         float currentScreenTop = mainCam.ViewportToWorldPoint( new Vector3( 0.0f, 1.0f, 0.0f ) ).y;
         float maxSize = currentScreenTop > height ? mainCam.orthographicSize : 15.0f;
         mainCam.orthographicSize = Mathf.Clamp( mainCam.orthographicSize - Input.mouseScrollDelta.y * ScrollSpeed, 3.0f, maxSize );

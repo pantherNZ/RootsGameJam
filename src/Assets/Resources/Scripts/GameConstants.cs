@@ -18,4 +18,5 @@ public class GameConstants : ScriptableObject
     public Resource startingResource;
     public Resource startingMaxResource;
     public List<BaseRoot> rootTypes;
+    public float menuSlerpSpeed;
 }

@@ -4,13 +4,18 @@ using UnityEngine;
 
 public class MainMenuLetter : MonoBehaviour
 {
+    [SerializeField] GameConstants constants;
+
     private Camera mainCamera;
-    const float moveTimeBase = 1.0f;
-    const float moveTimeRand = 0.5f;
+    private float moveTimeBase = 1.0f;
+    private float moveTimeRand = 0.5f;
     private Vector3 startPos;
 
     private void Start()
     {
+        moveTimeBase = constants.menuSlerpSpeed;
+        moveTimeRand = constants.menuSlerpSpeed / 4.0f;
+
         mainCamera = Camera.main;
         startPos = transform.localPosition;
         Reset();
@@ -37,11 +42,11 @@ public class MainMenuLetter : MonoBehaviour
 
     public void Hide()
     {
-        this.InterpolatePosition( GeneratePos(), moveTimeBase + ( Random.value - 0.5f ) * moveTimeRand, true );
+        this.InterpolatePosition( GeneratePos(), moveTimeBase + ( Random.value - 0.5f ) * moveTimeRand, true, true );
     }
 
     public void Show()
     {
-        this.InterpolatePosition( startPos, moveTimeBase + ( Random.value - 0.5f ) * moveTimeRand, true );
+        this.InterpolatePosition( startPos, moveTimeBase + ( Random.value - 0.5f ) * moveTimeRand, true, false );
     }
 }
