@@ -962,6 +962,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: PlayerController
       objectReference: {fileID: 0}
+    - target: {fileID: 5653337866320085487, guid: 58f6e48008dc17d4799c2fbb13e7d1b4, type: 3}
+      propertyPath: ScrollSpeed
+      value: 1
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 58f6e48008dc17d4799c2fbb13e7d1b4, type: 3}
 --- !u!1001 &4644042851156454211
