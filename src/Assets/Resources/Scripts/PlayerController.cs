@@ -32,6 +32,7 @@ public class PlayerController : EventReceiverInstance
     [SerializeField] ValueBarUI waterBarUI;
     [SerializeField] ValueBarUI foodBarUI;
     [SerializeField] ValueBarUI healthBarUI;
+    [SerializeField] GameObject levelUpUI;
     [SerializeField] TMPro.TextMeshProUGUI levelUI;
     [SerializeField] float menuFadeOutTime = 1.0f;
     [SerializeField] float rootScale = 1.0f;
@@ -230,7 +231,7 @@ public class PlayerController : EventReceiverInstance
 
     public void ShowLevelUpPopup()
     {
-
+        levelUpUI.SetActive( true );
     }
 
     public void LevelUp()
