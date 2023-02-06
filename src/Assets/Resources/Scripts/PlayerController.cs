@@ -116,8 +116,9 @@ public class PlayerController : EventReceiverInstance
             parent = currentConnection.parent,
         };
 
+        var depth = currentConnection.parent == null ? 49 : currentConnection.parent.sprite.sortingOrder - 1;
         newRoot.baseCol = newRoot.sprite.color;
-
+        newRoot.sprite.sortingOrder = depth;
         newRoot.obj.transform.localPosition = new Vector3();
         newRoot.obj.transform.localScale = new Vector3( rootScale, rootScale, rootScale );
     }
