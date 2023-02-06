@@ -193,7 +193,7 @@ MonoBehaviour:
   description: Basic root which has a start and end connection
   waterCost: 10
   foodCost: 10
-  icon: {fileID: 0}
+  icon: {fileID: 2800000, guid: 09addeb8cdae4fa46a18f0a86e738c6e, type: 3}
   isPlaced: 0
   requiredLevel: 0
 --- !u!1001 &2039916447700244819

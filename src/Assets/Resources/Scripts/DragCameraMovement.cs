@@ -32,7 +32,7 @@ public class DragCameraMovement : MonoBehaviour
 
         InputPriority.Instance.Request( () => Input.GetMouseButton( 0 ), "rootSelectionUI", -1, () => {
             if (controller.newRoot != null) return;
-            Difference = (mainCam.ScreenToWorldPoint(Input.mousePosition)) - mainCam.transform.position;
+            Difference = (mainCam.ScreenToWorldPoint(Input.mousePosition)) - controller.transform.position;
             if (drag == false) {
                 drag = true;
                 Origin = mainCam.ScreenToWorldPoint(Input.mousePosition);
@@ -41,10 +41,10 @@ public class DragCameraMovement : MonoBehaviour
                 Vector3 newCameraPos = Origin - Difference;
                 if( mainCam.ViewportToWorldPoint( new Vector3( 0.0f, 1.0f, 0.0f ) ).y > height )
                 {
-                    newCameraPos.y = Mathf.Min( newCameraPos.y, mainCam.transform.position.y );
+                    newCameraPos.y = Mathf.Min( newCameraPos.y, controller.transform.position.y );
                     Origin = mainCam.ScreenToWorldPoint( Input.mousePosition );
                 }
-                mainCam.transform.position = newCameraPos;
+                controller.transform.position = newCameraPos;
             }
         });
         if (!Input.GetMouseButton( 0 )){
@@ -52,7 +52,7 @@ public class DragCameraMovement : MonoBehaviour
         }
         if( Input.GetKeyDown( KeyCode.Space ) )
         {
-            mainCam.transform.position = ResetCamera;
+            controller.transform.position = ResetCamera;
             mainCam.orthographicSize = 5.0f;
         }
     }
