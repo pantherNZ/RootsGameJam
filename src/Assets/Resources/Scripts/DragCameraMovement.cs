@@ -27,7 +27,7 @@ public class DragCameraMovement : MonoBehaviour
             return;
 
         float currentScreenTop = mainCam.ViewportToWorldPoint( new Vector3( 0.0f, 1.0f, 0.0f ) ).y;
-        float maxSize = currentScreenTop > height ? mainCam.orthographicSize : 15.0f;
+        float maxSize = currentScreenTop > height ? mainCam.orthographicSize : 10.0f;
         mainCam.orthographicSize = Mathf.Clamp( mainCam.orthographicSize - Input.mouseScrollDelta.y * ScrollSpeed, 3.0f, maxSize );
 
         InputPriority.Instance.Request( () => Input.GetMouseButton( 0 ), "rootSelectionUI", -1, () => {
