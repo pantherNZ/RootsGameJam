@@ -14,14 +14,17 @@ public class RootEntryUI : MonoBehaviour
     {
         nameText.text = info.rootName;
         descText.text = info.description;
-        costWaterText.text = info.waterCost.ToString();
-        costFoodText.text = info.foodCost.ToString();
+        costWaterText.text = info.cost.water.ToString();
+        costFoodText.text = info.cost.food.ToString();
         image.sprite = info.icon != null ? Utility.CreateSprite( info.icon ) : null;
         this.info = info;
     }
 
-    public void CheckEnabled( int water, int food )
+    public void CheckEnabled( Resource res )
     {
-        GetComponent<Button>().interactable = water >= info.waterCost && food >= info.foodCost;
+        GetComponent<Button>().interactable =
+            res.water >= info.cost.water &&
+            res.food >= info.cost.food &&
+            res.energy >= info.cost.energy;
     }
 }

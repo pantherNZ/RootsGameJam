@@ -27,7 +27,7 @@ public class PlayerController : EventReceiverInstance
     [SerializeField] RootEntryUI rootEntryUIPrefab;
     [SerializeField] ValueBarUI waterBarUI;
     [SerializeField] ValueBarUI foodBarUI;
-    [SerializeField] ValueBarUI healthBarUI;
+    [SerializeField] ValueBarUI energyBarUI;
     [SerializeField] GameObject levelUpUI;
     [SerializeField] TMPro.TextMeshProUGUI levelUI;
     [SerializeField] float menuFadeOutTime = 1.0f;
@@ -66,8 +66,7 @@ public class PlayerController : EventReceiverInstance
         ListenToConnections( rootConnections );
         SetupRootTypeUIOptions();
 
-        waterBarUI.SetValue( currentResource.water, maxResource.water );
-        foodBarUI.SetValue( currentResource.food, maxResource.food );
+        UpdateBars();
 
         levelUpUIColour = levelUpUI.GetComponentInChildren<Image>().color;
         ShowLevelUpPopup( false );
@@ -97,7 +96,7 @@ public class PlayerController : EventReceiverInstance
 
         foreach( Transform t in rootSelectionUIContent.transform )
         {
-            t.GetComponent<RootEntryUI>().CheckEnabled( currentResource.water, currentResource.food );
+            t.GetComponent<RootEntryUI>().CheckEnabled( currentResource );
         }
 
         InputPriority.Instance.Cancel( "rootSelectionUI" );
@@ -128,23 +127,22 @@ public class PlayerController : EventReceiverInstance
     {;
         if( e is GainResourcesEvent gain )
         {
-            currentResource.water = Mathf.Min( maxResource.water, currentResource.water + gain.water );
-            currentResource.food = Mathf.Min( maxResource.food, currentResource.food + gain.nutrients );
+            currentResource.water = Mathf.Min( maxResource.water, currentResource.water + gain.res.water );
+            currentResource.food = Mathf.Min( maxResource.food, currentResource.food + gain.res.food );
+            currentResource.energy = Mathf.Min( maxResource.energy, currentResource.energy + gain.res.energy );
             UpdateBars();
-
 
             if( currentConnection != null )
             {
                 foreach( Transform t in rootSelectionUIContent.transform )
                 {
-                    t.GetComponent<RootEntryUI>().CheckEnabled( currentResource.water, currentResource.food );
+                    t.GetComponent<RootEntryUI>().CheckEnabled( currentResource );
                 }
             }
         }
         else if( e is ModifyStorageEvent modify )
         {
-            maxResource.water += modify.water;
-            maxResource.food += modify.nutrients;
+            maxResource += modify.res;
             UpdateBars();
             ShowLevelUpPopup( levelUpUI.activeSelf );
         }
@@ -154,6 +152,7 @@ public class PlayerController : EventReceiverInstance
     {
         waterBarUI.SetValue( currentResource.water, maxResource.water );
         foodBarUI.SetValue( currentResource.food, maxResource.food );
+        energyBarUI.SetValue( currentResource.energy, maxResource.energy );
     }
 
     void Update()
@@ -221,11 +220,9 @@ public class PlayerController : EventReceiverInstance
     void ConfirmNewRoot()
     {
         var rootType = newRoot.obj.GetComponent<BaseRoot>();
-        currentResource.water -= rootType.waterCost;
-        currentResource.food -= rootType.foodCost;
+        currentResource -= rootType.cost;
 
-        waterBarUI.SetValue( currentResource.water, maxResource.food );
-        foodBarUI.SetValue( currentResource.food, maxResource.food );
+        UpdateBars();
 
         rootType.isPlaced = true;
         rootType.OnPlacement();
@@ -255,6 +252,7 @@ public class PlayerController : EventReceiverInstance
 
     void ShowMenu()
     {
+        inMenu = true;
         foreach( var letter in mainMenuLetters )
             letter.Show();
 
@@ -289,13 +287,13 @@ public class PlayerController : EventReceiverInstance
         if( !CanLevelUp() )
             return;
 
-        currentResource.food -= GetLevelUpCost().food;
-        currentResource.water -= GetLevelUpCost().water;
+        currentResource -= GetLevelUpCost();
         UpdateBars();
 
         ChangeLevel( level + 1 );
         SetupRootTypeUIOptions();
         ShowLevelUpPopup( false );
+        maxResource.energy = GetLevelUpCost().energy;
     }
 
     public void SetupRootTypeUIOptions()

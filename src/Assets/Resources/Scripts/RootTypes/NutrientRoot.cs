@@ -3,8 +3,7 @@
 public class NutrientRoot : BaseRoot
 {
     [SerializeField] float gatherTimeSec = 1.0f;
-    [SerializeField] int waterGain = 5;
-    [SerializeField] int nutrientGain = 5;
+    [SerializeField] Resource gain;
 
     public override void OnPlacement()
     {
@@ -20,18 +19,7 @@ public class NutrientRoot : BaseRoot
     {
         EventSystem.Instance.TriggerEvent( new GainResourcesEvent()
         {
-            water = WaterToGain(),
-            nutrients = NutrientsToGain()
+            res = gain
         } );
-    }
-
-    protected virtual int WaterToGain()
-    {
-        return waterGain;
-    }
-
-    protected virtual int NutrientsToGain()
-    {
-        return nutrientGain;
     }
 }

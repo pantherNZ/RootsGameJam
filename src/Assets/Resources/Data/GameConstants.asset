@@ -15,44 +15,57 @@ MonoBehaviour:
   levelCosts:
   - food: 100
     water: 100
-  - food: 200
-    water: 200
-  - food: 350
-    water: 500
-  - food: 1000
-    water: 1000
-  - food: 2000
-    water: 6000
-  - food: 10000
-    water: 10000
-  - food: 20000
-    water: 15000
-  - food: 25000
-    water: 25000
-  - food: 50000
-    water: 100000
-  - food: 100000
-    water: 200000
-  - food: 250000
+    energy: 0
+  - food: 0
     water: 0
-  - food: 500000
-    water: 500000
-  - food: 1000000
-    water: 1000000
-  - food: 10000000
-    water: 10000000
-  - food: 100000000
-    water: 100000000
-  - food: 1000000000
-    water: 1000000000
-  - food: 2147483647
-    water: 2147483647
+    energy: 100
+  - food: 0
+    water: 0
+    energy: 250
+  - food: 0
+    water: 0
+    energy: 500
+  - food: 0
+    water: 0
+    energy: 1000
+  - food: 0
+    water: 0
+    energy: 5000
+  - food: 0
+    water: 0
+    energy: 10000
+  - food: 0
+    water: 0
+    energy: 25000
+  - food: 0
+    water: 0
+    energy: 60000
+  - food: 0
+    water: 0
+    energy: 120000
+  - food: 0
+    water: 0
+    energy: 200000
+  - food: 0
+    water: 0
+    energy: 1000000
+  - food: 0
+    water: 0
+    energy: 10000000
+  - food: 0
+    water: 0
+    energy: 100000000
+  - food: 0
+    water: 0
+    energy: 1000000000
   startingResource:
     food: 50
     water: 50
+    energy: 0
   startingMaxResource:
     food: 100
     water: 100
+    energy: 100
   rootTypes:
   - {fileID: 3947190138934167415, guid: 2d0dc9d3013398d47bccda1a4ff8fbd1, type: 3}
   - {fileID: 9092125598873235104, guid: 2a206ce79abd7344abb779469868a8a7, type: 3}

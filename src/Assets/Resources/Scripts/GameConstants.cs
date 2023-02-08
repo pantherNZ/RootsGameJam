@@ -8,6 +8,23 @@ public struct Resource
 {
     public int food;
     public int water;
+    public int energy;
+
+    public static Resource operator -( Resource a ) => new()
+    {
+        food = -a.food,
+        water = -a.water,
+        energy = -a.energy,
+    };
+
+    public static Resource operator +( Resource a, Resource b ) => new()
+    {
+         food = a.food + b.food,
+         water = a.water + b.water,
+         energy = a.energy + b.energy
+    };
+
+    public static Resource operator -( Resource a, Resource b ) => a + ( -b );
 }
 
 [Serializable]

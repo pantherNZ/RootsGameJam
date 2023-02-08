@@ -4,8 +4,7 @@ public class BaseRoot : MonoBehaviour
 {
     public string rootName;
     public string description;
-    public int waterCost;
-    public int foodCost;
+    public Resource cost;
     public Texture2D icon;
     [HideInInspector]
     public bool isPlaced;

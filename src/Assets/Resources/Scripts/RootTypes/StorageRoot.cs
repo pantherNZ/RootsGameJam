@@ -2,15 +2,12 @@
 
 public class StorageRoot : BaseRoot
 {
-    [SerializeField] int waterStorage = 100;
-    [SerializeField] int nutrientStroage = 100;
-
+    [SerializeField] Resource storage;
     public override void OnPlacement()
     {
         EventSystem.Instance.TriggerEvent( new ModifyStorageEvent()
         {
-            water = waterStorage,
-            nutrients = nutrientStroage
+            res = storage,
         } );
     }
 
@@ -18,8 +15,7 @@ public class StorageRoot : BaseRoot
     {
         EventSystem.Instance.TriggerEvent( new ModifyStorageEvent()
         {
-            water = -waterStorage,
-            nutrients = -nutrientStroage
+            res = -storage,
         } );
     }
 }
