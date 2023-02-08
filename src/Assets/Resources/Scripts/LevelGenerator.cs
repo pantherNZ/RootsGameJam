@@ -26,7 +26,6 @@ public class LevelGenerator : MonoBehaviour
     private Camera mainCamera;
     private Dictionary<Vector2Int, GameObject> tiles = new Dictionary<Vector2Int, GameObject>();
     private float groundHeight;
-    private Vector3? previousPos;
     private Tree tree;
 
     private void Start()
@@ -52,11 +51,6 @@ public class LevelGenerator : MonoBehaviour
         return ( int )( f + Mathf.Sign( f ) * 0.5f );
     }
 
-    private int CeilAwayFromZero( float f )
-    {
-        return ( int )( f + Mathf.Sign( f ) );
-    }
-
     private void Update()
     {
         var cameraPos = mainCamera.transform.position;
@@ -77,8 +71,6 @@ public class LevelGenerator : MonoBehaviour
         TryConstructTile( new Vector2Int( RoundAwayFromZero( bounds.xMin / dirtTileSize ), RoundAwayFromZero( ( bounds.yMax - Mathf.Sign( groundHeight ) ) / dirtTileSize ) ) );
         TryConstructTile( new Vector2Int( RoundAwayFromZero( bounds.xMax / dirtTileSize ), RoundAwayFromZero( ( bounds.yMax - Mathf.Sign( groundHeight ) ) / dirtTileSize ) ) );
         TryConstructTile( currentTile );
-
-        previousPos = cameraPos;
     }
     private float RandomFromHash( int lseed )
     {
@@ -101,6 +93,8 @@ public class LevelGenerator : MonoBehaviour
         {
             foreach( var env in envObjects )
             {
+                seedOffset += 11;
+
                 float random = RandomFromHash( 1211 + seedOffset );
                 if( env.spawnChancePercent < random * 100.0f )
                     continue;

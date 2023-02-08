@@ -35,6 +35,7 @@ public class PlayerController : EventReceiverInstance
     public bool inMenu = true;
     [SerializeField] Color invalidPlacementColour = Color.red;
     [SerializeField] GameConstants gameConstants;
+    [SerializeField] LayerMask allowPlacementLayer;
 
     private Camera mainCamera;
     private List<MainMenuLetter> mainMenuLetters = new List<MainMenuLetter>();
@@ -183,7 +184,7 @@ public class PlayerController : EventReceiverInstance
                     {
                         return x.gameObject == newRoot.obj ||
                             x.transform.IsChildOf( newRoot.obj.transform ) ||
-                            x.GetComponent<RootConnection>() != null ||
+                            ( ( 1 << x.gameObject.layer ) & allowPlacementLayer.value ) != 0 ||
                             ( isFirstConnection && x.GetComponent<Tree>() != null );
                     } );
 

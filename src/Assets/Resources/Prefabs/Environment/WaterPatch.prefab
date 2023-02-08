@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 446731740944115364}
   - component: {fileID: 6616480190616513853}
   - component: {fileID: 3369247725359015493}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: WaterPatch
   m_TagString: Water
   m_Icon: {fileID: 0}
