@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 6502692289256205315}
   - component: {fileID: 9092125598873235104}
   m_Layer: 0
-  m_Name: NutrientRoot
+  m_Name: EnergyRoot
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -45,29 +45,25 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c388287747e9fd04f8f694358dfc91b2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  rootName: Nutrient Root
-  description: Gathers 5 Water and Nutrients per second
+  rootName: Energy Root
+  description: Converts 50 Water and Nutrients per second into 5 Energy
   cost:
-    food: 30
-    water: 30
+    food: 60
+    water: 60
     energy: 0
   icon: {fileID: 2800000, guid: 13e04c38abb13064faf0dda4182cbe10, type: 3}
   isPlaced: 0
-  requiredLevel: 0
-  placementLayerRequirement:
-    serializedVersion: 2
-    m_Bits: 0
-  placementRequirement: {fileID: 0}
-  gatherTimeSec: 0.2
+  requiredLevel: 1
+  gatherTimeSec: 3
   consume:
-    food: 0
-    water: 0
+    food: 150
+    water: 150
     energy: 0
   gain:
-    food: 1
-    water: 1
-    energy: 0
-  showGainToastUI: 0
+    food: 0
+    water: 0
+    energy: 5
+  showGainToastUI: 1
 --- !u!1 &5874525479893708746
 GameObject:
   m_ObjectHideFlags: 0
@@ -166,7 +162,7 @@ BoxCollider2D:
   m_IsTrigger: 1
   m_UsedByEffector: 0
   m_UsedByComposite: 0
-  m_Offset: {x: -0.008759603, y: 1.927456}
+  m_Offset: {x: -0.0036960244, y: 1.9300078}
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
     pivot: {x: 0.5, y: 0}
@@ -177,7 +173,7 @@ BoxCollider2D:
     adaptiveTiling: 0
   m_AutoTiling: 0
   serializedVersion: 2
-  m_Size: {x: 0.8723247, y: 2.8673604}
+  m_Size: {x: 0.8621975, y: 2.872464}
   m_EdgeRadius: 0
 --- !u!1 &6743284943737639642
 GameObject:

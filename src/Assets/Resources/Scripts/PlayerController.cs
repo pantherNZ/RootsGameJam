@@ -22,6 +22,7 @@ public class PlayerController : EventReceiverInstance
     int level;
     [SerializeField] GameObject rootSelectionUI;
     [SerializeField] GameObject gameUIRoot;
+    [SerializeField] GameObject worldUIRoot;
     [SerializeField] CanvasGroup mainMenuPanel;
     [SerializeField] GameObject rootSelectionUIContent;
     [SerializeField] RootEntryUI rootEntryUIPrefab;
@@ -30,6 +31,7 @@ public class PlayerController : EventReceiverInstance
     [SerializeField] ValueBarUI energyBarUI;
     [SerializeField] GameObject levelUpUI;
     [SerializeField] TMPro.TextMeshProUGUI levelUI;
+    [SerializeField] GameObject gainResourceUIPrefab;
     [SerializeField] float menuFadeOutTime = 1.0f;
     [SerializeField] float rootScale = 1.0f;
     public bool inMenu = true;
@@ -127,24 +129,39 @@ public class PlayerController : EventReceiverInstance
     {;
         if( e is GainResourcesEvent gain )
         {
-            currentResource.water = Mathf.Min( maxResource.water, currentResource.water + gain.res.water );
-            currentResource.food = Mathf.Min( maxResource.food, currentResource.food + gain.res.food );
-            currentResource.energy = Mathf.Min( maxResource.energy, currentResource.energy + gain.res.energy );
-            UpdateBars();
-
-            if( currentConnection != null )
+            if( ( maxResource + gain.res ).IsValid() )
             {
-                foreach( Transform t in rootSelectionUIContent.transform )
+                currentResource.water = Mathf.Min( maxResource.water, currentResource.water + gain.res.water );
+                currentResource.food = Mathf.Min( maxResource.food, currentResource.food + gain.res.food );
+                currentResource.energy = Mathf.Min( maxResource.energy, currentResource.energy + gain.res.energy );
+                UpdateBars();
+
+                if( currentConnection != null )
                 {
-                    t.GetComponent<RootEntryUI>().CheckEnabled( currentResource );
+                    foreach( Transform t in rootSelectionUIContent.transform )
+                    {
+                        t.GetComponent<RootEntryUI>().CheckEnabled( currentResource );
+                    }
+                }
+
+                if( gain.originForUIDisplay.HasValue )
+                {
+                    var newToast = Instantiate( gainResourceUIPrefab, worldUIRoot.transform );
+                    newToast.transform.position = gain.originForUIDisplay.Value;
+
+                    this.InterpolatePosition( newToast.transform, newToast.transform.position + new Vector3( 0.0f, 1.0f, 0.0f ), 1.0f );
+                    this.FadeToBlack( newToast.GetComponent<CanvasGroup>(), 1.0f );
                 }
             }
         }
         else if( e is ModifyStorageEvent modify )
         {
-            maxResource += modify.res;
-            UpdateBars();
-            ShowLevelUpPopup( levelUpUI.activeSelf );
+            if( ( maxResource + modify.res ).IsValid() )
+            {
+                maxResource += modify.res;
+                UpdateBars();
+                ShowLevelUpPopup( levelUpUI.activeSelf );
+            }
         }
     }
 
@@ -168,6 +185,7 @@ public class PlayerController : EventReceiverInstance
         {
             if( newRoot != null )
             {
+                var rootType = newRoot.obj.GetComponent<BaseRoot>();
                 var mousePos = mainCamera.ScreenToWorldPoint( Utility.GetMouseOrTouchPos() );
                 var direction = ( mousePos - currentConnection.transform.position ).normalized.ToVector2();
                 newRoot.obj.transform.rotation = Quaternion.Euler( 0.0f, 0.0f, -direction.Angle() + 90.0f );
@@ -186,6 +204,13 @@ public class PlayerController : EventReceiverInstance
                             ( ( 1 << x.gameObject.layer ) & allowPlacementLayer.value ) != 0 ||
                             ( isFirstConnection && x.GetComponent<Tree>() != null );
                     } );
+
+                if( validCollision && rootType.placementTagRequirement.Length > 0 && rootType.placementRequirement != null )
+                {
+                    colliderList.Clear();
+                    rootType.placementRequirement.OverlapCollider( new ContactFilter2D().NoFilter(), colliderList );
+                    validCollision = colliderList.Any( x => x.CompareTag( rootType.placementTagRequirement ) );
+                }
 
                 bool validPlacement = validCollision && validAngle;
                 newRoot.sprite.color = validPlacement ? newRoot.baseCol : invalidPlacementColour;
@@ -278,8 +303,9 @@ public class PlayerController : EventReceiverInstance
 
     private bool CanLevelUp()
     {
-        return currentResource.water >= GetLevelUpCost().water && 
-            currentResource.food >= GetLevelUpCost().food;
+        return currentResource.water >= GetLevelUpCost().water &&
+            currentResource.food >= GetLevelUpCost().food &&
+            currentResource.energy >= GetLevelUpCost().energy;
     }
 
     public void LevelUp()

@@ -81,8 +81,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   rootName: Core Root
   description: Root which has multiple points to root off from
-  waterCost: 50
-  foodCost: 50
+  cost:
+    food: 80
+    water: 80
+    energy: 10
   icon: {fileID: 2800000, guid: 0c8b153d0b445e74c9d461a099666ab1, type: 3}
   isPlaced: 0
   requiredLevel: 1
@@ -184,7 +186,7 @@ BoxCollider2D:
   m_IsTrigger: 1
   m_UsedByEffector: 0
   m_UsedByComposite: 0
-  m_Offset: {x: -0.030190676, y: 1.9470339}
+  m_Offset: {x: -0.034729153, y: 1.9354151}
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
     pivot: {x: 0.5, y: 0}
@@ -195,7 +197,7 @@ BoxCollider2D:
     adaptiveTiling: 0
   m_AutoTiling: 0
   serializedVersion: 2
-  m_Size: {x: 0.93961865, y: 2.8864312}
+  m_Size: {x: 0.89423376, y: 2.8631938}
   m_EdgeRadius: 0
 --- !u!1001 &2039916447700244819
 PrefabInstance:

@@ -9,6 +9,8 @@ public class BaseRoot : MonoBehaviour
     [HideInInspector]
     public bool isPlaced;
     public int requiredLevel;
+    public string placementTagRequirement;
+    public Collider2D placementRequirement;
 
     public virtual void OnPlacement() { }
 }

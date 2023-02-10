@@ -25,6 +25,11 @@ public struct Resource
     };
 
     public static Resource operator -( Resource a, Resource b ) => a + ( -b );
+
+    public bool IsValid()
+    {
+        return food >= 0 && water >= 0 && energy >= 0;
+    }
 }
 
 [Serializable]

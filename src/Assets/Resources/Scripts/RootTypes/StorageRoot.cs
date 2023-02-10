@@ -11,7 +11,7 @@ public class StorageRoot : BaseRoot
         } );
     }
 
-    private void OnDestroy()
+    private void OnDisable()
     {
         EventSystem.Instance.TriggerEvent( new ModifyStorageEvent()
         {

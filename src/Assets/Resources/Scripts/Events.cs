@@ -1,6 +1,9 @@
-﻿public class GainResourcesEvent : IBaseEvent 
+﻿using UnityEngine;
+
+public class GainResourcesEvent : IBaseEvent 
 {
     public Resource res;
+    public Vector3? originForUIDisplay;
 }
 
 public class ModifyStorageEvent : IBaseEvent
