@@ -5,9 +5,9 @@ using UnityEngine;
 public class GameController : MonoBehaviour
 {
     [SerializeField] WaveData waveData;
+    [SerializeField] GameConstants constants;
     [SerializeField] DayNightCycleUI dayNightUI;
     [SerializeField] int currentDay;
-    [SerializeField] float currentTimeHours = 6.0f;
     [SerializeField] Transform spawnPosLeft;
     [SerializeField] Transform spawnPosRight;
 
@@ -15,15 +15,18 @@ public class GameController : MonoBehaviour
     private bool endlessMode;
     private List<GameObject> monsters = new();
     private PlayerController player;
+    private float currentTimeHours = 6.0f;
 
     private void Start()
     {
         player = FindObjectOfType<PlayerController>();
+
+        currentTimeHours = waveData.startHour;
     }
 
     private void Update()
     {
-        if( player.inMenu )
+        if( player.gameState != GameState.Game )
             return;
 
         const float hoursInDay = 24.0f;
@@ -78,7 +81,7 @@ public class GameController : MonoBehaviour
                 var modifiers = curentDayData.modifier;
                 if( endlessMode )
                     modifiers *= waveData.endlessPerDayModifier;
-                newMonster.AddComponent<Monster>().SetModifiers( modifiers );
+                newMonster.GetComponent<Monster>().Initialise( modifiers );
                 monsters.Add( newMonster );
 
                 yield return new WaitForSeconds( next.delayPerMonsterSec );

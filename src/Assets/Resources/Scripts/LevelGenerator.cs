@@ -18,7 +18,6 @@ public class LevelGenerator : MonoBehaviour
     [SerializeField] GameObject dirtTilePrefab;
     [SerializeField] Vector2 dirtTileSize;
     [SerializeField] float groundHeightOffset;
-    [SerializeField] float timeOfDay;
     [SerializeField] List<EnvObject> envObjects;
     [SerializeField] List<GameObject> grassObjects;
     [SerializeField] int levelSeed;

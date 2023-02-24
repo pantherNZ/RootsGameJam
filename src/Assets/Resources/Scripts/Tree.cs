@@ -22,7 +22,7 @@ public class Tree : MonoBehaviour
         var ed = treeLevelUpObj.GetComponent<EventDispatcherV2>();
         ed.OnPointerEnterEvent.AddListener( x =>
         {
-            if( controller.inMenu )
+            if( controller.gameState != GameState.Game )
                 return;
             hovered = true;
             sprite.color = treeHighlightColour;
@@ -46,5 +46,15 @@ public class Tree : MonoBehaviour
     {
         if( hovered )
             treeLevelUpObj.transform.Rotate( 0.0f, 0.0f, spinSpeed * Time.deltaTime, Space.Self );
+    }
+
+    public void ReceiveDamage( int damage, DamageType type )
+    {
+        health = Mathf.Max( 0, damage );
+
+        if( health <= 0 )
+        {
+            EventSystem.Instance.TriggerEvent( new GameOverEvent() );
+        }
     }
 }

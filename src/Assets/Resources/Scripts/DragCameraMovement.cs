@@ -19,7 +19,7 @@ public class DragCameraMovement : MonoBehaviour
 
     void Update()
     {
-        if( controller.inMenu )
+        if( controller.gameState != GameState.Game )
         {
             startingPos = controller.transform.position;
             return;

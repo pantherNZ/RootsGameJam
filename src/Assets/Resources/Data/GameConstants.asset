@@ -67,7 +67,7 @@ MonoBehaviour:
     water: 9999
     energy: 99999
   rootTypes:
-  - {fileID: 3947190138934167415, guid: 2d0dc9d3013398d47bccda1a4ff8fbd1, type: 3}
+  - {fileID: 304646283082999509, guid: 3a1d5103169790d47885472a4afd97a4, type: 3}
   - {fileID: 9092125598873235104, guid: 2a206ce79abd7344abb779469868a8a7, type: 3}
   - {fileID: 9092125598873235104, guid: 8eb840c1bf418ef4195c09c9671c8184, type: 3}
   - {fileID: 6669641805014024086, guid: 14b2037a48fb8e24387798a2e5d558a6, type: 3}

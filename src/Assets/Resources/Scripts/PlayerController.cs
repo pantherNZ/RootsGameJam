@@ -12,6 +12,14 @@ public class Root
     public List<Root> children = new List<Root>();
     public Root parent;
     public Color baseCol;
+    public PathCreation.Examples.RoadMeshCreator spline;
+}
+
+public enum GameState
+{
+    Menu,
+    Game,
+    GameOver,
 }
 
 public class PlayerController : EventReceiverInstance
@@ -34,10 +42,11 @@ public class PlayerController : EventReceiverInstance
     [SerializeField] GameObject gainResourceUIPrefab;
     [SerializeField] float menuFadeOutTime = 1.0f;
     [SerializeField] float rootScale = 1.0f;
-    public bool inMenu = true;
     [SerializeField] Color invalidPlacementColour = Color.red;
     [SerializeField] GameConstants gameConstants;
     [SerializeField] LayerMask allowPlacementLayer;
+    [SerializeField] GameObject gameOverScreen;
+    public GameState gameState = GameState.Menu;
 
     private Camera mainCamera;
     private List<MainMenuLetter> mainMenuLetters = new List<MainMenuLetter>();
@@ -53,9 +62,7 @@ public class PlayerController : EventReceiverInstance
 
         mainCamera = Camera.main;
 
-        gameUIRoot.SetActive( !inMenu );
-        rootSelectionUI.SetActive( !inMenu );
-        mainMenuPanel.gameObject.SetActive( inMenu );
+        UpdateScreens();
         ChangeLevel( 0 );
 
         currentResource = gameConstants.startingResource;
@@ -74,6 +81,15 @@ public class PlayerController : EventReceiverInstance
         ShowLevelUpPopup( false );
     }
 
+    private void UpdateScreens()
+    {
+        gameUIRoot.SetActive( gameState == GameState.Game );
+        rootSelectionUI.SetActive( gameState == GameState.Game );
+        mainMenuPanel.gameObject.SetActive( gameState == GameState.Menu );
+        gameUIRoot.SetActive( gameState == GameState.GameOver );
+        levelUpUI.SetActive( false );
+    }
+
     void ListenToConnections( RootConnection[] connections )
     { 
         foreach( var connection in connections )
@@ -88,7 +104,7 @@ public class PlayerController : EventReceiverInstance
 
     void ConnectionClicked( RootConnection connection )
     {
-        if( inMenu || newRoot != null || currentConnection != null )
+        if( gameState != GameState.Game || newRoot != null || currentConnection != null )
             return;
 
         // Show UI
@@ -108,21 +124,48 @@ public class PlayerController : EventReceiverInstance
     {
         rootSelectionUI.SetActive( false );
 
-        var rootObj = Instantiate( rootType, currentConnection.transform );
-
-        newRoot = new Root()
+        if( rootType.GetComponent<PathCreation.Examples.RoadMeshCreator>() )
         {
-            obj = rootObj.gameObject,
-            sprite = rootObj.GetComponentInChildren<SpriteRenderer>(),
-            collision = rootObj.GetComponentInChildren<Collider2D>(),
-            parent = currentConnection.parent,
-        };
+            PathCreation.Examples.RoadMeshCreator spline;
 
-        var depth = currentConnection.parent == null ? 49 : currentConnection.parent.sprite.sortingOrder - 1;
-        newRoot.baseCol = newRoot.sprite.color;
-        newRoot.sprite.sortingOrder = depth;
-        newRoot.obj.transform.localPosition = new Vector3();
-        newRoot.obj.transform.localScale = new Vector3( rootScale, rootScale, rootScale );
+            if( currentConnection.parent == null )
+            {
+                var rootObj = Instantiate( rootType, currentConnection.transform );
+                spline = rootObj.GetComponent<PathCreation.Examples.RoadMeshCreator>();
+            }
+            else
+            {
+                spline = currentConnection.parent.obj.GetComponent<PathCreation.Examples.RoadMeshCreator>();
+                var pos = currentConnection.transform.position + currentConnection.transform.forward * 2.0f;
+                spline.pathCreator.bezierPath.AddSegmentToEnd( pos );
+            }
+
+            newRoot = new Root()
+            {
+                obj = spline.gameObject,
+                collision = spline.gameObject.GetComponentInChildren<Collider2D>(),
+                spline = spline,
+                parent = currentConnection.parent,
+            };
+        }
+        else
+        {
+            var rootObj = Instantiate( rootType, currentConnection.transform );
+
+            newRoot = new Root()
+            {
+                obj = rootObj.gameObject,
+                sprite = rootObj.GetComponentInChildren<SpriteRenderer>(),
+                collision = rootObj.GetComponentInChildren<Collider2D>(),
+                parent = currentConnection.parent,
+            };
+
+            var depth = currentConnection.parent == null ? 49 : currentConnection.parent.sprite.sortingOrder - 1;
+            newRoot.baseCol = newRoot.sprite.color;
+            newRoot.sprite.sortingOrder = depth;
+            newRoot.obj.transform.localPosition = new Vector3();
+            newRoot.obj.transform.localScale = new Vector3( rootScale, rootScale, rootScale );
+        }
     }
 
     public override void OnEventReceived( IBaseEvent e )
@@ -163,6 +206,11 @@ public class PlayerController : EventReceiverInstance
                 ShowLevelUpPopup( levelUpUI.activeSelf );
             }
         }
+        else if( e is GameOverEvent )
+        {
+            gameState = GameState.GameOver;
+            UpdateScreens();
+        }
     }
 
     void UpdateBars()
@@ -174,7 +222,7 @@ public class PlayerController : EventReceiverInstance
 
     void Update()
     {
-        if( inMenu )
+        if( gameState == GameState.Menu )
         {
             if( Input.anyKeyDown )
             {
@@ -185,64 +233,84 @@ public class PlayerController : EventReceiverInstance
         {
             if( newRoot != null )
             {
-                var rootType = newRoot.obj.GetComponent<BaseRoot>();
-                var mousePos = mainCamera.ScreenToWorldPoint( Utility.GetMouseOrTouchPos() );
-                var direction = ( mousePos - currentConnection.transform.position ).normalized.ToVector2();
-                newRoot.obj.transform.rotation = Quaternion.Euler( 0.0f, 0.0f, -direction.Angle() + 90.0f );
-
-                // Collision and angle check
-                List<Collider2D> colliderList = new List<Collider2D>();
-                bool isFirstConnection = currentConnection.parent == null;
-                newRoot.collision.OverlapCollider( new ContactFilter2D().NoFilter(), colliderList );
-                //bool validAngle = ( Vector3.Angle( direction, currentConnection.transform.right ) <= currentConnection.rootMaxAngleDegrees / 2.0f ||
-                //    ( currentConnection.allowBackwards && Vector3.Angle( direction, -currentConnection.transform.right ) > currentConnection.rootMaxAngleDegrees / 2.0f ) );
-                bool validAngle = true;
-                bool validCollision = colliderList.All( x =>
-                    {
-                        return x.gameObject == newRoot.obj ||
-                            x.transform.IsChildOf( newRoot.obj.transform ) ||
-                            ( ( 1 << x.gameObject.layer ) & allowPlacementLayer.value ) != 0 ||
-                            ( isFirstConnection && x.GetComponent<Tree>() != null );
-                    } );
-
-                if( validCollision && rootType.placementTagRequirement.Length > 0 && rootType.placementRequirement != null )
-                {
-                    colliderList.Clear();
-                    rootType.placementRequirement.OverlapCollider( new ContactFilter2D().NoFilter(), colliderList );
-                    validCollision = colliderList.Any( x => x.CompareTag( rootType.placementTagRequirement ) );
-                }
-
-                bool validPlacement = validCollision && validAngle;
-                newRoot.sprite.color = validPlacement ? newRoot.baseCol : invalidPlacementColour;
-
-                // Place
-                if( validPlacement && Input.GetMouseButtonDown( 0 ) )
-                {
-                    ConfirmNewRoot();
-                }
-                // Cancel
-                else if( Input.GetMouseButtonDown( 1 ) )
-                {
-                    newRoot.obj.Destroy();
-                    newRoot = null;
-                    currentConnection = null;
-                }
+                ProcessRootPlacement();
             }
             else if( currentConnection != null )
             {
-                InputPriority.Instance.Request( () => Input.GetMouseButtonDown( 0 ) || Input.GetMouseButtonDown( 1 ), "rootSelectionUI", 0, () =>
-                {
-                    if( Input.GetMouseButtonDown( 1 ) || !Utility.IsPointerOverGameObject( rootSelectionUI ) )
-                    {
-                        currentConnection = null;
-                        rootSelectionUI.SetActive( false );
-                    }
-                } );
+                ProcessSelectionUI();
             }
         }
     }
 
-    void ConfirmNewRoot()
+    private void ProcessRootPlacement()
+    {
+        var mousePos = mainCamera.ScreenToWorldPoint( Utility.GetMouseOrTouchPos() );
+
+        if( newRoot.spline != null )
+        {
+            var path = newRoot.spline.pathCreator.bezierPath;
+            path.MovePoint( path.NumPoints - 1, mousePos );
+        }
+        else
+        {
+            var direction = ( mousePos - currentConnection.transform.position ).normalized.ToVector2();
+            newRoot.obj.transform.rotation = Quaternion.Euler( 0.0f, 0.0f, -direction.Angle() + 90.0f );
+
+            // Collision and angle check
+            List<Collider2D> colliderList = new List<Collider2D>();
+            bool isFirstConnection = currentConnection.parent == null;
+            newRoot.collision.OverlapCollider( new ContactFilter2D().NoFilter(), colliderList );
+            //bool validAngle = ( Vector3.Angle( direction, currentConnection.transform.right ) <= currentConnection.rootMaxAngleDegrees / 2.0f ||
+            //    ( currentConnection.allowBackwards && Vector3.Angle( direction, -currentConnection.transform.right ) > currentConnection.rootMaxAngleDegrees / 2.0f ) );
+            bool validAngle = true;
+            bool validCollision = colliderList.All( x =>
+            {
+                return x.gameObject == newRoot.obj ||
+                    x.transform.IsChildOf( newRoot.obj.transform ) ||
+                    ( ( 1 << x.gameObject.layer ) & allowPlacementLayer.value ) != 0 ||
+                    ( isFirstConnection && x.GetComponent<Tree>() != null );
+            } );
+
+            var rootType = newRoot.obj.GetComponent<BaseRoot>();
+
+            if( validCollision && rootType.placementTagRequirement.Length > 0 && rootType.placementRequirement != null )
+            {
+                colliderList.Clear();
+                rootType.placementRequirement.OverlapCollider( new ContactFilter2D().NoFilter(), colliderList );
+                validCollision = colliderList.Any( x => x.CompareTag( rootType.placementTagRequirement ) );
+            }
+
+            bool validPlacement = validCollision && validAngle;
+            newRoot.sprite.color = validPlacement ? newRoot.baseCol : invalidPlacementColour;
+
+            // Place
+            if( validPlacement && Input.GetMouseButtonDown( 0 ) )
+            {
+                ConfirmNewRoot();
+            }
+            // Cancel
+            else if( Input.GetMouseButtonDown( 1 ) )
+            {
+                newRoot.obj.Destroy();
+                newRoot = null;
+                currentConnection = null;
+            }
+        }
+    }
+
+    private void ProcessSelectionUI()
+    {
+        InputPriority.Instance.Request( () => Input.GetMouseButtonDown( 0 ) || Input.GetMouseButtonDown( 1 ), "rootSelectionUI", 0, () =>
+        {
+            if( Input.GetMouseButtonDown( 1 ) || !Utility.IsPointerOverGameObject( rootSelectionUI ) )
+            {
+                currentConnection = null;
+                rootSelectionUI.SetActive( false );
+            }
+        } );
+    }
+
+    private void ConfirmNewRoot()
     {
         var rootType = newRoot.obj.GetComponent<BaseRoot>();
         currentResource -= rootType.cost;
@@ -266,7 +334,7 @@ public class PlayerController : EventReceiverInstance
 
     void HideMenu()
     {
-        inMenu = false;
+        gameState = GameState.Game;
         StartCoroutine( Utility.FadeToBlack( mainMenuPanel, menuFadeOutTime ) );
 
         foreach( var letter in mainMenuLetters )
@@ -277,7 +345,7 @@ public class PlayerController : EventReceiverInstance
 
     void ShowMenu()
     {
-        inMenu = true;
+        gameState = GameState.Menu;
         foreach( var letter in mainMenuLetters )
             letter.Show();
 
@@ -293,7 +361,7 @@ public class PlayerController : EventReceiverInstance
 
     public void ShowLevelUpPopup( bool show )
     {
-        levelUpUI.SetActive( show && !inMenu );
+        levelUpUI.SetActive( show && gameState == GameState.Game );
         var texts = levelUpUI.GetComponentsInChildren<TMPro.TextMeshProUGUI>();
         texts[0].text = string.Format( "Next Tree Age: {0}\nCost: ", level + 2 );
         texts[1].text = GetLevelUpCost().food.ToString();

@@ -32,6 +32,14 @@ public struct Resource
     }
 }
 
+[Serializable] 
+public enum DamageType
+{
+    Default,
+    Posion,
+    IgnoreArmour,
+}
+
 [Serializable]
 [CreateAssetMenu( fileName = "GameConstants", menuName = "ScriptableObjs/GameConstants" )]
 public class GameConstants : ScriptableObject

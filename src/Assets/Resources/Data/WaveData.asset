@@ -15,116 +15,19 @@ MonoBehaviour:
   dayLengthSec: 60
   nightStartHour: 22
   nightEndHour: 6
+  startHour: 6
   waves:
   - delaySec: 1
-    monsters: []
+    monsters:
+    - monsterPrefab: {fileID: 410713729358090703, guid: 85096e8bff5794c4daa6900297902e44, type: 3}
+      count: 5
+      delayPerMonsterSec: 1
     modifier:
       speedModifier: 1
       lifeModifier: 1
       damageModifier: 1
     spawnSide: 0
-  - delaySec: 1
-    monsters:
-    - monsterPrefab: {fileID: 0}
-      count: 0
-      delayPerMonsterSec: 0
-    modifier:
-      speedModifier: 0
-      lifeModifier: 0
-      damageModifier: 0
-    spawnSide: 0
-  - delaySec: 0
-    monsters: []
-    modifier:
-      speedModifier: 0
-      lifeModifier: 0
-      damageModifier: 0
-    spawnSide: 0
-  - delaySec: 0
-    monsters: []
-    modifier:
-      speedModifier: 0
-      lifeModifier: 0
-      damageModifier: 0
-    spawnSide: 0
-  - delaySec: 0
-    monsters: []
-    modifier:
-      speedModifier: 0
-      lifeModifier: 0
-      damageModifier: 0
-    spawnSide: 0
-  - delaySec: 0
-    monsters: []
-    modifier:
-      speedModifier: 0
-      lifeModifier: 0
-      damageModifier: 0
-    spawnSide: 0
-  - delaySec: 0
-    monsters: []
-    modifier:
-      speedModifier: 0
-      lifeModifier: 0
-      damageModifier: 0
-    spawnSide: 0
-  - delaySec: 0
-    monsters: []
-    modifier:
-      speedModifier: 0
-      lifeModifier: 0
-      damageModifier: 0
-    spawnSide: 0
-  - delaySec: 0
-    monsters: []
-    modifier:
-      speedModifier: 0
-      lifeModifier: 0
-      damageModifier: 0
-    spawnSide: 0
-  - delaySec: 0
-    monsters: []
-    modifier:
-      speedModifier: 0
-      lifeModifier: 0
-      damageModifier: 0
-    spawnSide: 0
-  endlessWaves:
-  - delaySec: 0
-    monsters: []
-    modifier:
-      speedModifier: 0
-      lifeModifier: 0
-      damageModifier: 0
-    spawnSide: 0
-  - delaySec: 0
-    monsters: []
-    modifier:
-      speedModifier: 0
-      lifeModifier: 0
-      damageModifier: 0
-    spawnSide: 0
-  - delaySec: 0
-    monsters: []
-    modifier:
-      speedModifier: 0
-      lifeModifier: 0
-      damageModifier: 0
-    spawnSide: 0
-  - delaySec: 0
-    monsters: []
-    modifier:
-      speedModifier: 0
-      lifeModifier: 0
-      damageModifier: 0
-    spawnSide: 0
-  - delaySec: 0
-    monsters: []
-    modifier:
-      speedModifier: 0
-      lifeModifier: 0
-      damageModifier: 0
-    spawnSide: 0
+  endlessWaves: []
   endlessPerDayModifier:
     speedModifier: 1.1
     lifeModifier: 1.1

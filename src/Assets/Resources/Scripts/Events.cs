@@ -10,3 +10,7 @@ public class ModifyStorageEvent : IBaseEvent
 {
     public Resource res;
 }
+
+public class GameOverEvent : IBaseEvent
+{
+}

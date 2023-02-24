@@ -52,6 +52,7 @@ public class WaveData : ScriptableObject
     public float dayLengthSec = 60;
     public int nightStartHour = 22;
     public int nightEndHour = 6;
+    public int startHour = 6;
     public List<Wave> waves;
     public List<Wave> endlessWaves;
     public Modifier endlessPerDayModifier;
