@@ -11,6 +11,8 @@ public class BaseRoot : MonoBehaviour
     public int requiredLevel;
     public string placementTagRequirement;
     public Collider2D placementRequirement;
+    public float lengthMin;
+    public float lengthMax;
 
     public virtual void OnPlacement() { }
 }

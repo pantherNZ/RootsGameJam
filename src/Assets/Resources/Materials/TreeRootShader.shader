@@ -30,6 +30,7 @@ Shader "TreeRootShader" {
             #pragma multi_compile_fog
 
 			sampler2D _MainTex;
+			float4 _MainTex_ST;
 			sampler2D _GrabTexture;
 			fixed4 _Colour;
 
@@ -56,7 +57,7 @@ Shader "TreeRootShader" {
 
 				vertexOutput.vertex = UnityObjectToClipPos(vertexInput.vertex);
 				vertexOutput.screenPos = vertexOutput.vertex;
-				vertexOutput.texcoord = vertexInput.texcoord;
+				vertexOutput.texcoord = TRANSFORM_TEX(vertexInput.texcoord, _MainTex);
 				vertexOutput.color = vertexInput.color * _Colour;
 
 				return vertexOutput;

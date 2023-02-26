@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Linq;
 using System.Collections.Generic;
@@ -12,7 +13,8 @@ public class Root
     public List<Root> children = new List<Root>();
     public Root parent;
     public Color baseCol;
-    public PathCreation.Examples.RoadMeshCreator spline;
+    public RootMeshCreator spline;
+    public BaseRoot rootType;
 }
 
 public enum GameState
@@ -68,7 +70,7 @@ public class PlayerController : EventReceiverInstance
         currentResource = gameConstants.startingResource;
         maxResource = gameConstants.startingMaxResource;
 
-        // Find root connections and list to their click event
+        // Find root connections and listen to their click event
         var rootConnections = FindObjectsOfType<RootConnection>();
         mainMenuLetters = FindObjectsOfType<MainMenuLetter>().ToList();
 
@@ -79,97 +81,24 @@ public class PlayerController : EventReceiverInstance
 
         levelUpUIColour = levelUpUI.GetComponentInChildren<Image>().color;
         ShowLevelUpPopup( false );
-    }
 
-    private void UpdateScreens()
-    {
-        gameUIRoot.SetActive( gameState == GameState.Game );
-        rootSelectionUI.SetActive( gameState == GameState.Game );
-        mainMenuPanel.gameObject.SetActive( gameState == GameState.Menu );
-        gameUIRoot.SetActive( gameState == GameState.GameOver );
-        levelUpUI.SetActive( false );
-    }
-
-    void ListenToConnections( RootConnection[] connections )
-    { 
-        foreach( var connection in connections )
+        // Hook up initial parent / link between connections and starting splines
+        var splines = FindObjectsOfType<RootMeshCreator>();
+        foreach( var spline in splines )
         {
-            var connectionLocal = connection;
-            connection.GetComponent<EventDispatcherV2>().OnPointerDownEvent.AddListener( x =>
-                     {
-                         ConnectionClicked( connectionLocal );
-                     } );
-        }
-    }
-
-    void ConnectionClicked( RootConnection connection )
-    {
-        if( gameState != GameState.Game || newRoot != null || currentConnection != null )
-            return;
-
-        // Show UI
-        rootSelectionUI.SetActive( true );
-        ( rootSelectionUI.transform as RectTransform ).anchoredPosition = mainCamera.WorldToScreenPoint( connection.transform.position );
-        currentConnection = connection;
-
-        foreach( Transform t in rootSelectionUIContent.transform )
-        {
-            t.GetComponent<RootEntryUI>().CheckEnabled( currentResource );
-        }
-
-        InputPriority.Instance.Cancel( "rootSelectionUI" );
-    }
-
-    void RootUIOptionClicked( BaseRoot rootType )
-    {
-        rootSelectionUI.SetActive( false );
-
-        if( rootType.GetComponent<PathCreation.Examples.RoadMeshCreator>() )
-        {
-            PathCreation.Examples.RoadMeshCreator spline;
-
-            if( currentConnection.parent == null )
-            {
-                var rootObj = Instantiate( rootType, currentConnection.transform );
-                spline = rootObj.GetComponent<PathCreation.Examples.RoadMeshCreator>();
-            }
-            else
-            {
-                spline = currentConnection.parent.obj.GetComponent<PathCreation.Examples.RoadMeshCreator>();
-                var pos = currentConnection.transform.position + currentConnection.transform.forward * 2.0f;
-                spline.pathCreator.bezierPath.AddSegmentToEnd( pos );
-            }
-
-            newRoot = new Root()
+            spline.pathCreator.InitializeEditorData( true );
+            spline.transform.parent.GetComponent<RootConnection>().parent = new Root()
             {
                 obj = spline.gameObject,
-                collision = spline.gameObject.GetComponentInChildren<Collider2D>(),
+                collision = spline.GetComponentInChildren<Collider2D>(),
                 spline = spline,
-                parent = currentConnection.parent,
             };
-        }
-        else
-        {
-            var rootObj = Instantiate( rootType, currentConnection.transform );
-
-            newRoot = new Root()
-            {
-                obj = rootObj.gameObject,
-                sprite = rootObj.GetComponentInChildren<SpriteRenderer>(),
-                collision = rootObj.GetComponentInChildren<Collider2D>(),
-                parent = currentConnection.parent,
-            };
-
-            var depth = currentConnection.parent == null ? 49 : currentConnection.parent.sprite.sortingOrder - 1;
-            newRoot.baseCol = newRoot.sprite.color;
-            newRoot.sprite.sortingOrder = depth;
-            newRoot.obj.transform.localPosition = new Vector3();
-            newRoot.obj.transform.localScale = new Vector3( rootScale, rootScale, rootScale );
         }
     }
 
+
     public override void OnEventReceived( IBaseEvent e )
-    {;
+    {
         if( e is GainResourcesEvent gain )
         {
             if( ( maxResource + gain.res ).IsValid() )
@@ -242,14 +171,99 @@ public class PlayerController : EventReceiverInstance
         }
     }
 
+    private void UpdateScreens()
+    {
+        gameUIRoot.SetActive( gameState == GameState.Game );
+        rootSelectionUI.SetActive( gameState == GameState.Game );
+        mainMenuPanel.gameObject.SetActive( gameState == GameState.Menu );
+        gameUIRoot.SetActive( gameState == GameState.GameOver );
+        levelUpUI.SetActive( false );
+    }
+
+    void ListenToConnections( RootConnection[] connections )
+    { 
+        foreach( var connection in connections )
+        {
+            var connectionLocal = connection;
+            connection.GetComponent<EventDispatcherV2>().OnPointerDownEvent.AddListener( x =>
+            {
+                ConnectionClicked( connectionLocal );
+            } );
+        }
+    }
+
+    void ConnectionClicked( RootConnection connection )
+    {
+        if( gameState != GameState.Game || newRoot != null || currentConnection != null )
+            return;
+
+        // Show UI
+        rootSelectionUI.SetActive( true );
+        ( rootSelectionUI.transform as RectTransform ).anchoredPosition = mainCamera.WorldToScreenPoint( connection.transform.position );
+        currentConnection = connection;
+
+        foreach( Transform t in rootSelectionUIContent.transform )
+        {
+            t.GetComponent<RootEntryUI>().CheckEnabled( currentResource );
+        }
+
+        InputPriority.Instance.Cancel( "rootSelectionUI" );
+    }
+
+    void RootUIOptionClicked( BaseRoot rootType )
+    {
+        rootSelectionUI.SetActive( false );
+
+        if( rootType.GetComponent<RootMeshCreator>() )
+        {
+            var spline = currentConnection.parent.obj.GetComponent<RootMeshCreator>();
+            var pos = currentConnection.transform.position + currentConnection.transform.forward * 1.0f;
+            spline.pathCreator.bezierPath.AddSegmentToEnd( pos );
+            spline.TriggerUpdate();
+
+            newRoot = new Root()
+            {
+                obj = spline.gameObject,
+                collision = spline.gameObject.GetComponentInChildren<Collider2D>(),
+                spline = spline,
+                parent = currentConnection.parent,
+                rootType = rootType,
+            };
+        }
+        else
+        {
+            var rootObj = Instantiate( rootType, currentConnection.transform );
+
+            newRoot = new Root()
+            {
+                obj = rootObj.gameObject,
+                sprite = rootObj.GetComponentInChildren<SpriteRenderer>(),
+                collision = rootObj.GetComponentInChildren<Collider2D>(),
+                parent = currentConnection.parent,
+                rootType = rootObj.GetComponent<BaseRoot>()
+            };
+
+            var depth = currentConnection.parent == null ? 49 : currentConnection.parent.sprite.sortingOrder - 1;
+            newRoot.baseCol = newRoot.sprite.color;
+            newRoot.sprite.sortingOrder = depth;
+            newRoot.obj.transform.localPosition = new Vector3();
+            newRoot.obj.transform.localScale = new Vector3( rootScale, rootScale, rootScale );
+        }
+    }
+
     private void ProcessRootPlacement()
     {
         var mousePos = mainCamera.ScreenToWorldPoint( Utility.GetMouseOrTouchPos() );
+        bool validPlacement = false;
 
         if( newRoot.spline != null )
         {
+            validPlacement = true; // TODO
+
             var path = newRoot.spline.pathCreator.bezierPath;
-            path.MovePoint( path.NumPoints - 1, mousePos );
+            var localPos = newRoot.obj.transform.worldToLocalMatrix.MultiplyPoint( mousePos );
+            path.MovePoint( path.NumPoints - 1, localPos );
+            newRoot.spline.TriggerUpdate();
         }
         else
         {
@@ -280,21 +294,29 @@ public class PlayerController : EventReceiverInstance
                 validCollision = colliderList.Any( x => x.CompareTag( rootType.placementTagRequirement ) );
             }
 
-            bool validPlacement = validCollision && validAngle;
+            validPlacement = validCollision && validAngle;
             newRoot.sprite.color = validPlacement ? newRoot.baseCol : invalidPlacementColour;
+        }
 
-            // Place
-            if( validPlacement && Input.GetMouseButtonDown( 0 ) )
-            {
-                ConfirmNewRoot();
-            }
-            // Cancel
-            else if( Input.GetMouseButtonDown( 1 ) )
+        // Place
+        if( validPlacement && Input.GetMouseButtonDown( 0 ) )
+        {
+            ConfirmNewRoot();
+        }
+        // Cancel
+        else if( Input.GetMouseButtonDown( 1 ) )
+        {
+            if( newRoot.spline == null || newRoot.spline.pathCreator.bezierPath.NumPoints <= 4 )
             {
                 newRoot.obj.Destroy();
-                newRoot = null;
-                currentConnection = null;
             }
+            else
+            {
+                newRoot.spline.pathCreator.bezierPath.DeleteSegment( newRoot.spline.pathCreator.bezierPath.NumPoints - 1 );
+            }
+
+            newRoot = null;
+            currentConnection = null;
         }
     }
 
@@ -312,7 +334,7 @@ public class PlayerController : EventReceiverInstance
 
     private void ConfirmNewRoot()
     {
-        var rootType = newRoot.obj.GetComponent<BaseRoot>();
+        var rootType = newRoot.rootType;
         currentResource -= rootType.cost;
 
         UpdateBars();
@@ -320,14 +342,22 @@ public class PlayerController : EventReceiverInstance
         rootType.isPlaced = true;
         rootType.OnPlacement();
         roots.Add( newRoot );
-        var newConnections = newRoot.obj.GetComponentsInChildren<RootConnection>();
-        ListenToConnections( newConnections );
 
-        foreach( var connection in newConnections )
-            connection.parent = newRoot;
+        //if( newRoot.spline == null )
+        {
+            var newConnections = newRoot.obj.GetComponentsInChildren<RootConnection>( true );
+            ListenToConnections( newConnections );
 
-        if( --currentConnection.numConnectionsAllowed == 0 )
-            currentConnection.GetComponent<EventDispatcherV2>().OnPointerDownEvent.RemoveAllListeners();
+            foreach( var connection in newConnections )
+            {
+                connection.gameObject.SetActive( true );
+                connection.parent = newRoot;
+            }
+
+            if( newRoot.spline == null && --currentConnection.currentConnections == 0 )
+                currentConnection.GetComponent<EventDispatcherV2>().OnPointerDownEvent.RemoveAllListeners();
+        }
+
         newRoot = null;
         currentConnection = null;
     }
