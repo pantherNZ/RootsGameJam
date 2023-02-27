@@ -26,6 +26,9 @@ public class RootMeshCreator : PathSceneTool
     MeshRenderer meshRenderer;
     Mesh mesh;
 
+    Material roadMaterialInstance;
+    Material undersideMaterialInstance;
+
     protected override void PathUpdated () {
         if (pathCreator != null) {
             AssignMeshComponents ();
@@ -150,7 +153,12 @@ public class RootMeshCreator : PathSceneTool
 
     void AssignMaterials () {
         if (roadMaterial != null && undersideMaterial != null) {
-            meshRenderer.sharedMaterials = new Material[] { roadMaterial, undersideMaterial, undersideMaterial };
+
+            if( roadMaterialInstance == null )
+                roadMaterialInstance = Instantiate( roadMaterial );
+            if( undersideMaterialInstance == null )
+                undersideMaterialInstance = Instantiate( undersideMaterial );
+            meshRenderer.sharedMaterials = new Material[] { roadMaterialInstance, undersideMaterialInstance, undersideMaterialInstance };
             textureTilingFinal = textureTiling * ( scaleTilingByLength ? pathCreator.path.length : 1.0f );
             meshRenderer.sharedMaterials[0].mainTextureScale = new Vector3 (1, textureTilingFinal );
         }
