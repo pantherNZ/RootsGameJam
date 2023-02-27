@@ -107,9 +107,9 @@ MonoBehaviour:
   flattenSurface: 1
   roadMaterial: {fileID: 2100000, guid: b5df4735192845740bd11076dc9cdc99, type: 2}
   undersideMaterial: {fileID: 2100000, guid: 2163514d27972d444853b30bf24ee049, type: 2}
-  textureTiling: 1
+  textureTiling: 0.3
   scaleTilingByLength: 1
-  textureTilingFinal: 1
+  textureTilingFinal: 0.3
   meshHolder: {fileID: 0}
 --- !u!114 &304646283082999509
 MonoBehaviour:
@@ -178,6 +178,18 @@ PrefabInstance:
     - target: {fileID: 1711878016247184825, guid: b25eaeb96a74dfe4fa9cdbcd068d00df, type: 3}
       propertyPath: m_LocalEulerAnglesHint.y
       value: 90
+      objectReference: {fileID: 0}
+    - target: {fileID: 1737996800529509711, guid: b25eaeb96a74dfe4fa9cdbcd068d00df, type: 3}
+      propertyPath: autoUpdatePos
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1737996800529509711, guid: b25eaeb96a74dfe4fa9cdbcd068d00df, type: 3}
+      propertyPath: currentConnections
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 1737996800529509711, guid: b25eaeb96a74dfe4fa9cdbcd068d00df, type: 3}
+      propertyPath: numConnectionsAllowed
+      value: 2
       objectReference: {fileID: 0}
     - target: {fileID: 1759973318419262438, guid: b25eaeb96a74dfe4fa9cdbcd068d00df, type: 3}
       propertyPath: numConnectionsAllowed
@@ -271,24 +283,3 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 6502692289256205315, guid: b25eaeb96a74dfe4fa9cdbcd068d00df, type: 3}
   m_PrefabInstance: {fileID: 8820396694241210443}
   m_PrefabAsset: {fileID: 0}
---- !u!1 &4425931277849601762 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 5117295356698351273, guid: b25eaeb96a74dfe4fa9cdbcd068d00df, type: 3}
-  m_PrefabInstance: {fileID: 8820396694241210443}
-  m_PrefabAsset: {fileID: 0}
---- !u!58 &4562753456121124159
-CircleCollider2D:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4425931277849601762}
-  m_Enabled: 1
-  m_Density: 1
-  m_Material: {fileID: 0}
-  m_IsTrigger: 0
-  m_UsedByEffector: 0
-  m_UsedByComposite: 0
-  m_Offset: {x: 0, y: 0}
-  serializedVersion: 2
-  m_Radius: 0.14

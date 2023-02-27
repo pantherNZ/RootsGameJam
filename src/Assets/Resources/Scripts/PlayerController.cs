@@ -15,6 +15,7 @@ public class Root
     public Color baseCol;
     public RootMeshCreator spline;
     public BaseRoot rootType;
+    public int depth;
 }
 
 public enum GameState
@@ -217,18 +218,58 @@ public class PlayerController : EventReceiverInstance
         if( rootType.GetComponent<RootMeshCreator>() )
         {
             var spline = currentConnection.parent.obj.GetComponent<RootMeshCreator>();
-            var pos = currentConnection.transform.position + currentConnection.transform.forward * 1.0f;
-            spline.pathCreator.bezierPath.AddSegmentToEnd( pos );
-            spline.TriggerUpdate();
+            var prevTValue = spline.pathCreator.path.GetClosestTimeOnPath( currentConnection.transform.position );
 
-            newRoot = new Root()
+            // If the connection is less than 90%, then branch off a new spline
+            if( prevTValue < 0.9f && currentConnection.parent.depth > 0 )
             {
-                obj = spline.gameObject,
-                collision = spline.gameObject.GetComponentInChildren<Collider2D>(),
-                spline = spline,
-                parent = currentConnection.parent,
-                rootType = rootType,
-            };
+                var newSpline = Instantiate( rootType, currentConnection.transform ).GetComponent<RootMeshCreator>();
+                newSpline.pathCreator.InitializeEditorData( true );
+                newSpline.TriggerUpdate();
+
+                newRoot = new Root()
+                {
+                    obj = newSpline.gameObject,
+                    collision = newSpline.gameObject.GetComponentInChildren<Collider2D>(),
+                    spline = newSpline,
+                    parent = currentConnection.parent,
+                    rootType = rootType,
+                    depth = currentConnection.parent.depth + 1,
+                };
+            }
+            // Extend the existing spline
+            else
+            {
+                var pos = currentConnection.transform.position + currentConnection.transform.forward * 1.0f;
+                spline.pathCreator.bezierPath.AddSegmentToEnd( pos );
+                spline.TriggerUpdate();
+
+                newRoot = new Root()
+                {
+                    obj = spline.gameObject,
+                    collision = spline.gameObject.GetComponentInChildren<Collider2D>(),
+                    spline = spline,
+                    parent = currentConnection.parent,
+                    rootType = rootType,
+                    depth = currentConnection.parent.depth + 1,
+                };
+
+                var connectionsToConstruct = rootType.GetComponentsInChildren<RootConnection>( true );
+
+                // Update old connections t values (set their distance along path, so they maintain their position)
+                var oldConnections = spline.GetComponentsInChildren<RootConnection>( true );
+                foreach( var connection in oldConnections )
+                    connection.distAlongPath = spline.pathCreator.path.GetClosestDistanceAlongPath( connection.transform.position );
+
+                // Construct new connections and set their t values
+                foreach( var connection in connectionsToConstruct )
+                {
+                    var newConnection = Instantiate( connection, newRoot.obj.transform );
+                    newConnection.parent = newRoot;
+                    newConnection.tValue = prevTValue + ( 1.0f - prevTValue ) * newConnection.tValue;
+                    ListenToConnections( new RootConnection[] { newConnection } );
+                }
+            }
         }
         else
         {
@@ -240,7 +281,8 @@ public class PlayerController : EventReceiverInstance
                 sprite = rootObj.GetComponentInChildren<SpriteRenderer>(),
                 collision = rootObj.GetComponentInChildren<Collider2D>(),
                 parent = currentConnection.parent,
-                rootType = rootObj.GetComponent<BaseRoot>()
+                rootType = rootObj.GetComponent<BaseRoot>(),
+                depth = currentConnection.parent.depth + 1,
             };
 
             var depth = currentConnection.parent == null ? 49 : currentConnection.parent.sprite.sortingOrder - 1;
@@ -261,7 +303,8 @@ public class PlayerController : EventReceiverInstance
             validPlacement = true; // TODO
 
             var path = newRoot.spline.pathCreator.bezierPath;
-            var localPos = newRoot.obj.transform.worldToLocalMatrix.MultiplyPoint( mousePos );
+            var localPos = newRoot.spline.pathCreator.path.WorldToLocal( mousePos );
+            //var localPos = newRoot.obj.transform.worldToLocalMatrix.MultiplyPoint( mousePos );
             path.MovePoint( path.NumPoints - 1, localPos );
             newRoot.spline.TriggerUpdate();
         }
@@ -306,6 +349,13 @@ public class PlayerController : EventReceiverInstance
         // Cancel
         else if( Input.GetMouseButtonDown( 1 ) )
         {
+            var numNewConnections = newRoot.rootType.GetComponentsInChildren<RootConnection>( true ).Length;
+            var allConnections = newRoot.obj.GetComponentsInChildren<RootConnection>( true );
+            for( int i = 0; i < numNewConnections; ++i )
+            {
+                allConnections[allConnections.Length - numNewConnections + i].DestroyGameObject();
+            }
+
             if( newRoot.spline == null || newRoot.spline.pathCreator.bezierPath.NumPoints <= 4 )
             {
                 newRoot.obj.Destroy();
@@ -313,6 +363,7 @@ public class PlayerController : EventReceiverInstance
             else
             {
                 newRoot.spline.pathCreator.bezierPath.DeleteSegment( newRoot.spline.pathCreator.bezierPath.NumPoints - 1 );
+                newRoot.spline.TriggerUpdate();
             }
 
             newRoot = null;
@@ -343,7 +394,7 @@ public class PlayerController : EventReceiverInstance
         rootType.OnPlacement();
         roots.Add( newRoot );
 
-        //if( newRoot.spline == null )
+        if( newRoot.spline == null )
         {
             var newConnections = newRoot.obj.GetComponentsInChildren<RootConnection>( true );
             ListenToConnections( newConnections );
@@ -353,9 +404,11 @@ public class PlayerController : EventReceiverInstance
                 connection.gameObject.SetActive( true );
                 connection.parent = newRoot;
             }
+        }
 
-            if( newRoot.spline == null && --currentConnection.currentConnections == 0 )
-                currentConnection.GetComponent<EventDispatcherV2>().OnPointerDownEvent.RemoveAllListeners();
+        if( --currentConnection.currentConnections == 0 )
+        {
+            currentConnection.GetComponent<EventDispatcherV2>().OnPointerDownEvent.RemoveAllListeners();
         }
 
         newRoot = null;

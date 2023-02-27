@@ -124,7 +124,7 @@ public class RootMeshCreator : PathSceneTool
     // Add MeshRenderer and MeshFilter components to this gameobject if not already attached
     void AssignMeshComponents () {
 
-        if (meshHolder == null) {
+        if (meshHolder == null ) {
             meshHolder = new GameObject ("Road Mesh Holder");
         }
 
@@ -152,7 +152,7 @@ public class RootMeshCreator : PathSceneTool
         if (roadMaterial != null && undersideMaterial != null) {
             meshRenderer.sharedMaterials = new Material[] { roadMaterial, undersideMaterial, undersideMaterial };
             textureTilingFinal = textureTiling * ( scaleTilingByLength ? pathCreator.path.length : 1.0f );
-            meshRenderer.sharedMaterials[0].mainTextureScale = new Vector3 (1, textureTiling );
+            meshRenderer.sharedMaterials[0].mainTextureScale = new Vector3 (1, textureTilingFinal );
         }
     }
 
