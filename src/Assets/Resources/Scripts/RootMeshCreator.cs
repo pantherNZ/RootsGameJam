@@ -2,6 +2,7 @@
 using PathCreation.Utility;
 using UnityEngine;
 using PathCreation;
+using UnityEditor;
 
 public class RootMeshCreator : PathSceneTool 
 {
@@ -30,11 +31,17 @@ public class RootMeshCreator : PathSceneTool
     Material undersideMaterialInstance;
 
     protected override void PathUpdated () {
-        if (pathCreator != null) {
-            AssignMeshComponents ();
-            AssignMaterials ();
-            CreateRoadMesh ();
-        }
+        if( pathCreator == null )
+            return;
+
+#if UNITY_EDITOR
+        if( PrefabUtility.GetPrefabAssetType( gameObject ) != PrefabAssetType.NotAPrefab )
+            return;
+#endif
+
+        AssignMeshComponents();
+        AssignMaterials();
+        CreateRoadMesh();
     }
 
     void CreateRoadMesh () {
@@ -46,6 +53,8 @@ public class RootMeshCreator : PathSceneTool
         int[] roadTriangles = new int[numTris * 3];
         int[] underRoadTriangles = new int[numTris * 3];
         int[] sideOfRoadTriangles = new int[numTris * 2 * 3];
+
+        Vector2[] collisionPointsSides = new Vector2[path.NumPoints * 2];
 
         int vertIndex = 0;
         int triIndex = 0;
@@ -66,6 +75,9 @@ public class RootMeshCreator : PathSceneTool
             // Find position to left and right of current path vertex
             Vector3 vertSideA = path.GetPoint (i) - localRight * Mathf.Abs (roadWidth);
             Vector3 vertSideB = path.GetPoint (i) + localRight * Mathf.Abs (roadWidth);
+
+            collisionPointsSides[i] = vertSideA;
+            collisionPointsSides[path.NumPoints * 2 - i - 1] = vertSideB;
 
             // Add top of road vertices
             verts[vertIndex + 0] = vertSideA;
@@ -122,13 +134,17 @@ public class RootMeshCreator : PathSceneTool
         mesh.SetTriangles (underRoadTriangles, 1);
         mesh.SetTriangles (sideOfRoadTriangles, 2);
         mesh.RecalculateBounds ();
+
+        meshHolder.gameObject.GetComponent<PolygonCollider2D>().SetPath( 0, collisionPointsSides );
     }
 
     // Add MeshRenderer and MeshFilter components to this gameobject if not already attached
     void AssignMeshComponents () {
 
-        if (meshHolder == null ) {
-            meshHolder = new GameObject ("Road Mesh Holder");
+        if (meshHolder == null )
+        {
+            meshHolder = new GameObject( "Road Mesh Holder" );
+            meshHolder.transform.parent = transform;
         }
 
         meshHolder.transform.rotation = Quaternion.identity;
@@ -141,6 +157,9 @@ public class RootMeshCreator : PathSceneTool
         }
         if (!meshHolder.GetComponent<MeshRenderer> ()) {
             meshHolder.gameObject.AddComponent<MeshRenderer> ();
+        }
+        if (!meshHolder.GetComponent<PolygonCollider2D> ()) {
+            meshHolder.gameObject.AddComponent<PolygonCollider2D> ();
         }
 
         meshRenderer = meshHolder.GetComponent<MeshRenderer> ();

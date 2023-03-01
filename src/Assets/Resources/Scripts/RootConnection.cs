@@ -9,7 +9,7 @@ public class RootConnection : MonoBehaviour
     public float rootMaxAngleDegrees = 150.0f;
     public bool allowBackwards = false;
     public int numConnectionsAllowed = 1;
-    [HideInInspector]
+    [ReadOnly]
     public int currentConnections = 1;
     public float tValue = 1.0f;
     public float? distAlongPath;

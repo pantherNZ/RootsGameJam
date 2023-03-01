@@ -9,6 +9,7 @@ public class Root
 {
     public GameObject obj;
     public SpriteRenderer sprite;
+    public MeshRenderer mesh;
     public Collider2D collision;
     public List<Root> children = new List<Root>();
     public Root parent;
@@ -177,7 +178,7 @@ public class PlayerController : EventReceiverInstance
         gameUIRoot.SetActive( gameState == GameState.Game );
         rootSelectionUI.SetActive( gameState == GameState.Game );
         mainMenuPanel.gameObject.SetActive( gameState == GameState.Menu );
-        gameUIRoot.SetActive( gameState == GameState.GameOver );
+        gameUIRoot.SetActive( gameState == GameState.Game );
         levelUpUI.SetActive( false );
     }
 
@@ -236,6 +237,17 @@ public class PlayerController : EventReceiverInstance
                     rootType = rootType,
                     depth = currentConnection.parent.depth + 1,
                 };
+
+                var connections = newSpline.GetComponentsInChildren<RootConnection>( true );
+                ListenToConnections( connections );
+                foreach( var connection in connections )
+                    connection.parent = newRoot;
+
+                Utility.FunctionTimer.CreateTimer( 0.1f, () =>
+                {
+                    newRoot.mesh = newSpline.GetComponentInChildren<MeshRenderer>();
+                    newRoot.baseCol = newRoot.mesh.material.GetColor( "_Colour" );
+                } );
             }
             // Extend the existing spline
             else
@@ -254,21 +266,25 @@ public class PlayerController : EventReceiverInstance
                     depth = currentConnection.parent.depth + 1,
                 };
 
-                var connectionsToConstruct = rootType.GetComponentsInChildren<RootConnection>( true );
-
                 // Update old connections t values (set their distance along path, so they maintain their position)
                 var oldConnections = spline.GetComponentsInChildren<RootConnection>( true );
                 foreach( var connection in oldConnections )
                     connection.distAlongPath = spline.pathCreator.path.GetClosestDistanceAlongPath( connection.transform.position );
 
                 // Construct new connections and set their t values
+                var connectionsToConstruct = rootType.GetComponentsInChildren<RootConnection>( true );
+                var numSegments = spline.pathCreator.bezierPath.NumSegments - 1;
+                var tValueStart = ( 1.0f / numSegments ) * ( numSegments - 1 );
                 foreach( var connection in connectionsToConstruct )
                 {
                     var newConnection = Instantiate( connection, newRoot.obj.transform );
                     newConnection.parent = newRoot;
-                    newConnection.tValue = prevTValue + ( 1.0f - prevTValue ) * newConnection.tValue;
+                    newConnection.tValue = tValueStart + ( 1.0f - tValueStart ) * newConnection.tValue;
                     ListenToConnections( new RootConnection[] { newConnection } );
                 }
+
+                newRoot.mesh = spline.GetComponentInChildren<MeshRenderer>();
+                newRoot.baseCol = newRoot.mesh.material.GetColor( "_Colour" );
             }
         }
         else
@@ -285,7 +301,8 @@ public class PlayerController : EventReceiverInstance
                 depth = currentConnection.parent.depth + 1,
             };
 
-            var depth = currentConnection.parent == null ? 49 : currentConnection.parent.sprite.sortingOrder - 1;
+            var depth = ( currentConnection.parent == null ||
+                currentConnection.parent.sprite == null ) ? 49 : currentConnection.parent.sprite.sortingOrder - 1;
             newRoot.baseCol = newRoot.sprite.color;
             newRoot.sprite.sortingOrder = depth;
             newRoot.obj.transform.localPosition = new Vector3();
@@ -296,15 +313,16 @@ public class PlayerController : EventReceiverInstance
     private void ProcessRootPlacement()
     {
         var mousePos = mainCamera.ScreenToWorldPoint( Utility.GetMouseOrTouchPos() );
-        bool validPlacement = false;
 
+        // Positioning
         if( newRoot.spline != null )
         {
-            validPlacement = true; // TODO
-
             var path = newRoot.spline.pathCreator.bezierPath;
-            var localPos = newRoot.spline.pathCreator.path.WorldToLocal( mousePos );
-            //var localPos = newRoot.obj.transform.worldToLocalMatrix.MultiplyPoint( mousePos );
+            var fromPos = path.GetPoint( path.NumPoints - 2 );
+            var offset = mousePos - fromPos;
+            if( newRoot.rootType.lengthMax > 0.0 )
+                offset = offset.Clamp( newRoot.rootType.lengthMin, newRoot.rootType.lengthMax );
+            var localPos = newRoot.spline.pathCreator.path.WorldToLocal( fromPos + offset );
             path.MovePoint( path.NumPoints - 1, localPos );
             newRoot.spline.TriggerUpdate();
         }
@@ -312,34 +330,39 @@ public class PlayerController : EventReceiverInstance
         {
             var direction = ( mousePos - currentConnection.transform.position ).normalized.ToVector2();
             newRoot.obj.transform.rotation = Quaternion.Euler( 0.0f, 0.0f, -direction.Angle() + 90.0f );
-
-            // Collision and angle check
-            List<Collider2D> colliderList = new List<Collider2D>();
-            bool isFirstConnection = currentConnection.parent == null;
-            newRoot.collision.OverlapCollider( new ContactFilter2D().NoFilter(), colliderList );
-            //bool validAngle = ( Vector3.Angle( direction, currentConnection.transform.right ) <= currentConnection.rootMaxAngleDegrees / 2.0f ||
-            //    ( currentConnection.allowBackwards && Vector3.Angle( direction, -currentConnection.transform.right ) > currentConnection.rootMaxAngleDegrees / 2.0f ) );
-            bool validAngle = true;
-            bool validCollision = colliderList.All( x =>
-            {
-                return x.gameObject == newRoot.obj ||
-                    x.transform.IsChildOf( newRoot.obj.transform ) ||
-                    ( ( 1 << x.gameObject.layer ) & allowPlacementLayer.value ) != 0 ||
-                    ( isFirstConnection && x.GetComponent<Tree>() != null );
-            } );
-
-            var rootType = newRoot.obj.GetComponent<BaseRoot>();
-
-            if( validCollision && rootType.placementTagRequirement.Length > 0 && rootType.placementRequirement != null )
-            {
-                colliderList.Clear();
-                rootType.placementRequirement.OverlapCollider( new ContactFilter2D().NoFilter(), colliderList );
-                validCollision = colliderList.Any( x => x.CompareTag( rootType.placementTagRequirement ) );
-            }
-
-            validPlacement = validCollision && validAngle;
-            newRoot.sprite.color = validPlacement ? newRoot.baseCol : invalidPlacementColour;
         }
+
+        // Collision and angle check
+        List<Collider2D> colliderList = new List<Collider2D>();
+        bool isFirstConnection = newRoot.depth == 0;
+        newRoot.collision.OverlapCollider( new ContactFilter2D().NoFilter(), colliderList );
+        //bool validAngle = ( Vector3.Angle( direction, currentConnection.transform.right ) <= currentConnection.rootMaxAngleDegrees / 2.0f ||
+        //    ( currentConnection.allowBackwards && Vector3.Angle( direction, -currentConnection.transform.right ) > currentConnection.rootMaxAngleDegrees / 2.0f ) );
+        bool validAngle = true;
+        bool validCollision = colliderList.All( x =>
+        {
+            return x.gameObject == newRoot.obj ||
+                x.transform.IsChildOf( newRoot.obj.transform ) ||
+                ( ( 1 << x.gameObject.layer ) & allowPlacementLayer.value ) != 0 ||
+                ( isFirstConnection && x.GetComponent<Tree>() != null );
+        } );
+
+        var rootType = newRoot.obj.GetComponent<BaseRoot>();
+
+        if( validCollision && rootType != null && rootType.placementTagRequirement.Length > 0 && rootType.placementRequirement != null )
+        {
+            colliderList.Clear();
+            rootType.placementRequirement.OverlapCollider( new ContactFilter2D().NoFilter(), colliderList );
+            validCollision = colliderList.Any( x => x.CompareTag( rootType.placementTagRequirement ) );
+        }
+
+        bool validPlacement = validCollision && validAngle;
+
+        // Colour tint
+        if( newRoot.sprite != null )
+            newRoot.sprite.color = validPlacement ? newRoot.baseCol : invalidPlacementColour;
+        if( newRoot.mesh != null )
+            newRoot.mesh.material.SetColor( "_Colour", validPlacement ? newRoot.baseCol : invalidPlacementColour );
 
         // Place
         if( validPlacement && Input.GetMouseButtonDown( 0 ) )
