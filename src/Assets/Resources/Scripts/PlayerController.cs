@@ -16,6 +16,7 @@ public class Root
     public Color baseCol;
     public RootMeshCreator spline;
     public BaseRoot rootType;
+    public Vector3 fromPos;
     public int depth;
 }
 
@@ -236,6 +237,7 @@ public class PlayerController : EventReceiverInstance
                     parent = currentConnection.parent,
                     rootType = rootType,
                     depth = currentConnection.parent.depth + 1,
+                    fromPos = currentConnection.transform.position,
                 };
 
                 var connections = newSpline.GetComponentsInChildren<RootConnection>( true );
@@ -264,6 +266,7 @@ public class PlayerController : EventReceiverInstance
                     parent = currentConnection.parent,
                     rootType = rootType,
                     depth = currentConnection.parent.depth + 1,
+                    fromPos = spline.pathCreator.bezierPath.GetPoint( spline.pathCreator.bezierPath.NumPoints - 4 ),
                 };
 
                 // Update old connections t values (set their distance along path, so they maintain their position)
@@ -318,8 +321,8 @@ public class PlayerController : EventReceiverInstance
         if( newRoot.spline != null )
         {
             var path = newRoot.spline.pathCreator.bezierPath;
-            var fromPos = path.GetPoint( path.NumPoints - 2 );
-            var offset = mousePos - fromPos;
+            var fromPos = newRoot.spline.pathCreator.path.LocalToWorld( newRoot.fromPos );
+            var offset = ( mousePos - fromPos ).SetZ( 0.0f );
             if( newRoot.rootType.lengthMax > 0.0 )
                 offset = offset.Clamp( newRoot.rootType.lengthMin, newRoot.rootType.lengthMax );
             var localPos = newRoot.spline.pathCreator.path.WorldToLocal( fromPos + offset );

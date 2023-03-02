@@ -67,7 +67,7 @@ MonoBehaviour:
       - 0
       globalNormalsAngle: 0
       flipNormals: 0
-    vertexPathUpToDate: 1
+    vertexPathUpToDate: 0
     vertexPathMaxAngleError: 0.3
     vertexPathMinVertexSpacing: 0
     showTransformTool: 1
@@ -134,8 +134,8 @@ MonoBehaviour:
   requiredLevel: 0
   placementTagRequirement: 
   placementRequirement: {fileID: 0}
-  lengthMin: 1
-  lengthMax: 2
+  lengthMin: 2
+  lengthMax: 5
 --- !u!1001 &8820396694241210443
 PrefabInstance:
   m_ObjectHideFlags: 0
