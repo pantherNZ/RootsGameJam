@@ -325,7 +325,10 @@ public class PlayerController : EventReceiverInstance
             var offset = ( mousePos - fromPos ).SetZ( 0.0f );
             if( newRoot.rootType.lengthMax > 0.0 )
                 offset = offset.Clamp( newRoot.rootType.lengthMin, newRoot.rootType.lengthMax );
-            var localPos = newRoot.spline.pathCreator.path.WorldToLocal( fromPos + offset );
+            var result = fromPos + offset;
+            if( result.y > gameConstants.maxPlaceYValue )
+                result.y = gameConstants.maxPlaceYValue;
+            var localPos = newRoot.spline.pathCreator.path.WorldToLocal( result );
             path.MovePoint( path.NumPoints - 1, localPos );
             newRoot.spline.TriggerUpdate();
         }
@@ -337,7 +340,7 @@ public class PlayerController : EventReceiverInstance
 
         // Collision and angle check
         List<Collider2D> colliderList = new List<Collider2D>();
-        bool isFirstConnection = newRoot.depth == 0;
+        bool isFirstConnection = newRoot.depth <= 1;
         newRoot.collision.OverlapCollider( new ContactFilter2D().NoFilter(), colliderList );
         //bool validAngle = ( Vector3.Angle( direction, currentConnection.transform.right ) <= currentConnection.rootMaxAngleDegrees / 2.0f ||
         //    ( currentConnection.allowBackwards && Vector3.Angle( direction, -currentConnection.transform.right ) > currentConnection.rootMaxAngleDegrees / 2.0f ) );
@@ -347,7 +350,7 @@ public class PlayerController : EventReceiverInstance
             return x.gameObject == newRoot.obj ||
                 x.transform.IsChildOf( newRoot.obj.transform ) ||
                 ( ( 1 << x.gameObject.layer ) & allowPlacementLayer.value ) != 0 ||
-                ( isFirstConnection && x.GetComponent<Tree>() != null );
+                ( isFirstConnection && x.CompareTag("Tree") );
         } );
 
         var rootType = newRoot.obj.GetComponent<BaseRoot>();
