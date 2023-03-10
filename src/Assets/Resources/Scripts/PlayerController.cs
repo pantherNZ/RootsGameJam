@@ -256,6 +256,7 @@ public class PlayerController : EventReceiverInstance
             {
                 var pos = currentConnection.transform.position + currentConnection.transform.forward * 1.0f;
                 spline.pathCreator.bezierPath.AddSegmentToEnd( pos );
+                spline.collisionDistOffset = 1.5f; // Prevent collision with tree
                 spline.TriggerUpdate();
 
                 newRoot = new Root()
@@ -313,6 +314,39 @@ public class PlayerController : EventReceiverInstance
         }
     }
 
+    public static bool LineLineIntersection( Vector3 linePoint1, Vector3 lineVec1, Vector3 linePoint2, Vector3 lineVec2 )
+    {
+        Vector3 lineVec3 = linePoint2 - linePoint1;
+        Vector3 crossVec1and2 = Vector3.Cross( lineVec1, lineVec2 );
+        Vector3 crossVec3and2 = Vector3.Cross( lineVec3, lineVec2 );
+
+        float planarFactor = Vector3.Dot( lineVec3, crossVec1and2 );
+
+        //is coplanar, and not parallel
+        if( Mathf.Abs( planarFactor ) < 0.0001f
+                && crossVec1and2.sqrMagnitude > 0.0001f )
+        {
+            float s = Vector3.Dot( crossVec3and2, crossVec1and2 )
+                    / crossVec1and2.sqrMagnitude;
+            var intersection = linePoint1 + ( lineVec1 * s );
+            float aSqrMagnitude = lineVec1.sqrMagnitude;
+            float bSqrMagnitude = lineVec2.sqrMagnitude;
+
+            if( ( intersection - linePoint1 ).sqrMagnitude <= aSqrMagnitude
+                 && ( intersection - ( linePoint1 + lineVec1 ) ).sqrMagnitude <= aSqrMagnitude
+                 && ( intersection - linePoint2 ).sqrMagnitude <= bSqrMagnitude
+                 && ( intersection - ( linePoint2 + lineVec2 ) ).sqrMagnitude <= bSqrMagnitude )
+            {
+                return true;
+            }
+            return false;
+        }
+        else
+        {
+            return false;
+        }
+    }
+
     private void ProcessRootPlacement()
     {
         var mousePos = mainCamera.ScreenToWorldPoint( Utility.GetMouseOrTouchPos() );
@@ -347,11 +381,30 @@ public class PlayerController : EventReceiverInstance
         bool validAngle = true;
         bool validCollision = colliderList.All( x =>
         {
-            return x.gameObject == newRoot.obj ||
-                x.transform.IsChildOf( newRoot.obj.transform ) ||
+            return //x.gameObject == newRoot.obj ||
+                //x.transform.IsChildOf( newRoot.obj.transform ) ||
                 ( ( 1 << x.gameObject.layer ) & allowPlacementLayer.value ) != 0 ||
                 ( isFirstConnection && x.CompareTag("Tree") );
         } );
+
+        for( int i = 0; i < newRoot.spline.pathCreator.bezierPath.NumPoints - 2 && validCollision; ++i )
+        {
+            var a1 = newRoot.spline.pathCreator.bezierPath.GetPoint( i );
+            var a2 = newRoot.spline.pathCreator.bezierPath.GetPoint( i + 1 );
+            for( int j = 0; j < newRoot.spline.pathCreator.bezierPath.NumPoints - 2; ++j )
+            {
+                if( Math.Abs( i - j ) < 3 )
+                    continue;
+
+                var b1 = newRoot.spline.pathCreator.bezierPath.GetPoint( j );
+                var b2 = newRoot.spline.pathCreator.bezierPath.GetPoint( j + 1 );
+                if( LineLineIntersection( a1, a2 - a1, b2, b2 - b1 ) )
+                {
+                    validCollision = false;
+                    break;
+                }
+            }
+        }
 
         var rootType = newRoot.obj.GetComponent<BaseRoot>();
 

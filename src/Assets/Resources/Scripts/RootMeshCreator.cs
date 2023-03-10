@@ -20,6 +20,8 @@ public class RootMeshCreator : PathSceneTool
     [ReadOnly]
     public float textureTilingFinal = 1;
 
+    public float collisionDistOffset;
+
     [SerializeField, HideInInspector]
     GameObject meshHolder;
 
@@ -54,7 +56,8 @@ public class RootMeshCreator : PathSceneTool
         int[] underRoadTriangles = new int[numTris * 3];
         int[] sideOfRoadTriangles = new int[numTris * 2 * 3];
 
-        Vector2[] collisionPointsSides = new Vector2[path.NumPoints * 2];
+        List<Vector2> collisionPointsLeft = new List<Vector2>();
+        List<Vector2> collisionPointsRight = new List<Vector2>();
 
         int vertIndex = 0;
         int triIndex = 0;
@@ -66,18 +69,29 @@ public class RootMeshCreator : PathSceneTool
         int[] triangleMap = { 0, 8, 1, 1, 8, 9 };
         int[] sidesTriangleMap = { 4, 6, 14, 12, 4, 14, 5, 15, 7, 13, 15, 5 };
 
-        bool usePathNormals = !(path.space == PathSpace.xyz && flattenSurface);
+        if( collisionDistOffset > 0.0f )
+        {
+            // Find position to left and right of current path vertex
+            Vector3 localRight = path.GetNormalAtDistance( collisionDistOffset );
+            Vector3 vertSideA = path.GetPointAtDistance( collisionDistOffset ) - localRight * Mathf.Abs( roadWidth );
+            Vector3 vertSideB = path.GetPointAtDistance( collisionDistOffset ) + localRight * Mathf.Abs( roadWidth );
+            collisionPointsLeft.Add( vertSideA );
+            collisionPointsRight.Add( vertSideB );
+        }
 
         for (int i = 0; i < path.NumPoints; i++) {
-            Vector3 localUp = (usePathNormals) ? Vector3.Cross (path.GetTangent (i), path.GetNormal (i)) : path.up;
-            Vector3 localRight = (usePathNormals) ? path.GetNormal (i) : Vector3.Cross (localUp, path.GetTangent (i));
+            Vector3 localUp = new Vector3( 0, 0, -1.0f );
+            Vector3 localRight = path.GetNormal( i );
 
             // Find position to left and right of current path vertex
             Vector3 vertSideA = path.GetPoint (i) - localRight * Mathf.Abs (roadWidth);
             Vector3 vertSideB = path.GetPoint (i) + localRight * Mathf.Abs (roadWidth);
 
-            collisionPointsSides[i] = vertSideA;
-            collisionPointsSides[path.NumPoints * 2 - i - 1] = vertSideB;
+            if( path.GetClosestDistanceAlongPath( path.GetPoint( i ) ) >= collisionDistOffset )
+            {
+                collisionPointsLeft.Add( vertSideA );
+                collisionPointsRight.Add( vertSideB );
+            }
 
             // Add top of road vertices
             verts[vertIndex + 0] = vertSideA;
@@ -125,6 +139,9 @@ public class RootMeshCreator : PathSceneTool
             triIndex += 6;
         }
 
+        collisionPointsRight.Reverse();
+        collisionPointsLeft.AddRange( collisionPointsRight );
+
         mesh.Clear ();
         mesh.vertices = verts;
         mesh.uv = uvs;
@@ -135,7 +152,7 @@ public class RootMeshCreator : PathSceneTool
         mesh.SetTriangles (sideOfRoadTriangles, 2);
         mesh.RecalculateBounds ();
 
-        meshHolder.gameObject.GetComponent<PolygonCollider2D>().SetPath( 0, collisionPointsSides );
+        meshHolder.gameObject.GetComponent<PolygonCollider2D>().SetPath( 0, collisionPointsLeft.ToArray() );
     }
 
     // Add MeshRenderer and MeshFilter components to this gameobject if not already attached
