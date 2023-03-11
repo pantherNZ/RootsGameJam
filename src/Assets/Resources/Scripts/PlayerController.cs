@@ -46,7 +46,6 @@ public class PlayerController : EventReceiverInstance
     [SerializeField] TMPro.TextMeshProUGUI levelUI;
     [SerializeField] GameObject gainResourceUIPrefab;
     [SerializeField] float menuFadeOutTime = 1.0f;
-    [SerializeField] float rootScale = 1.0f;
     [SerializeField] Color invalidPlacementColour = Color.red;
     [SerializeField] GameConstants gameConstants;
     [SerializeField] LayerMask allowPlacementLayer;
@@ -225,8 +224,10 @@ public class PlayerController : EventReceiverInstance
             // If the connection is less than 90%, then branch off a new spline
             if( prevTValue < 0.9f && currentConnection.parent.depth > 0 )
             {
-                var newSpline = Instantiate( rootType, currentConnection.transform ).GetComponent<RootMeshCreator>();
+                var newSpline = Instantiate( rootType ).GetComponent<RootMeshCreator>();
+                newSpline.transform.position = currentConnection.transform.position;
                 newSpline.pathCreator.InitializeEditorData( true );
+                newSpline.collisionDistOffset = 1.5f; // Prevent collision with tree
                 newSpline.TriggerUpdate();
 
                 newRoot = new Root()
@@ -267,7 +268,8 @@ public class PlayerController : EventReceiverInstance
                     parent = currentConnection.parent,
                     rootType = rootType,
                     depth = currentConnection.parent.depth + 1,
-                    fromPos = spline.pathCreator.bezierPath.GetPoint( spline.pathCreator.bezierPath.NumPoints - 4 ),
+                    fromPos = spline.pathCreator.path.LocalToWorld( 
+                        spline.pathCreator.bezierPath.GetPoint( spline.pathCreator.bezierPath.NumPoints - 4 ) ),
                 };
 
                 // Update old connections t values (set their distance along path, so they maintain their position)
@@ -293,7 +295,7 @@ public class PlayerController : EventReceiverInstance
         }
         else
         {
-            var rootObj = Instantiate( rootType, currentConnection.transform );
+            var rootObj = Instantiate( rootType );
 
             newRoot = new Root()
             {
@@ -309,8 +311,7 @@ public class PlayerController : EventReceiverInstance
                 currentConnection.parent.sprite == null ) ? 49 : currentConnection.parent.sprite.sortingOrder - 1;
             newRoot.baseCol = newRoot.sprite.color;
             newRoot.sprite.sortingOrder = depth;
-            newRoot.obj.transform.localPosition = new Vector3();
-            newRoot.obj.transform.localScale = new Vector3( rootScale, rootScale, rootScale );
+            newRoot.obj.transform.position = currentConnection.transform.position;
         }
     }
 
@@ -355,11 +356,10 @@ public class PlayerController : EventReceiverInstance
         if( newRoot.spline != null )
         {
             var path = newRoot.spline.pathCreator.bezierPath;
-            var fromPos = newRoot.spline.pathCreator.path.LocalToWorld( newRoot.fromPos );
-            var offset = ( mousePos - fromPos ).SetZ( 0.0f );
+            var offset = ( mousePos - newRoot.fromPos ).SetZ( 0.0f );
             if( newRoot.rootType.lengthMax > 0.0 )
                 offset = offset.Clamp( newRoot.rootType.lengthMin, newRoot.rootType.lengthMax );
-            var result = fromPos + offset;
+            var result = newRoot.fromPos + offset;
             if( result.y > gameConstants.maxPlaceYValue )
                 result.y = gameConstants.maxPlaceYValue;
             var localPos = newRoot.spline.pathCreator.path.WorldToLocal( result );
@@ -381,27 +381,30 @@ public class PlayerController : EventReceiverInstance
         bool validAngle = true;
         bool validCollision = colliderList.All( x =>
         {
-            return //x.gameObject == newRoot.obj ||
-                //x.transform.IsChildOf( newRoot.obj.transform ) ||
+            return x.gameObject == newRoot.obj ||
+                x.transform.IsChildOf( newRoot.obj.transform ) ||
                 ( ( 1 << x.gameObject.layer ) & allowPlacementLayer.value ) != 0 ||
                 ( isFirstConnection && x.CompareTag("Tree") );
         } );
 
-        for( int i = 0; i < newRoot.spline.pathCreator.bezierPath.NumPoints - 2 && validCollision; ++i )
+        if( newRoot.spline != null && validCollision )
         {
-            var a1 = newRoot.spline.pathCreator.bezierPath.GetPoint( i );
-            var a2 = newRoot.spline.pathCreator.bezierPath.GetPoint( i + 1 );
-            for( int j = 0; j < newRoot.spline.pathCreator.bezierPath.NumPoints - 2; ++j )
+            for( int i = 0; i < newRoot.spline.pathCreator.bezierPath.NumPoints - 2; ++i )
             {
-                if( Math.Abs( i - j ) < 3 )
-                    continue;
-
-                var b1 = newRoot.spline.pathCreator.bezierPath.GetPoint( j );
-                var b2 = newRoot.spline.pathCreator.bezierPath.GetPoint( j + 1 );
-                if( LineLineIntersection( a1, a2 - a1, b2, b2 - b1 ) )
+                var a1 = newRoot.spline.pathCreator.bezierPath.GetPoint( i );
+                var a2 = newRoot.spline.pathCreator.bezierPath.GetPoint( i + 1 );
+                for( int j = 0; j < newRoot.spline.pathCreator.bezierPath.NumPoints - 2; ++j )
                 {
-                    validCollision = false;
-                    break;
+                    if( Math.Abs( i - j ) < 3 )
+                        continue;
+
+                    var b1 = newRoot.spline.pathCreator.bezierPath.GetPoint( j );
+                    var b2 = newRoot.spline.pathCreator.bezierPath.GetPoint( j + 1 );
+                    if( LineLineIntersection( a1, a2 - a1, b2, b2 - b1 ) )
+                    {
+                        validCollision = false;
+                        break;
+                    }
                 }
             }
         }
