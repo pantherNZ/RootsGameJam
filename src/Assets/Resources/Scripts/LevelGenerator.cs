@@ -2,39 +2,39 @@ using System;
 using System.Linq;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Tilemaps;
 
 [Serializable]
 public class EnvObject
 {
     public int spawnChancePercent;
-    public int numPerTileMin;
-    public int numPerTileMax;
+    public int numPerChunkMin;
+    public int numPerChunkMax;
     public float minDistBetween;
-    public GameObject obj;
+    public RuleTile tilePrefab;
+    public GameObject objPrefab;
+    public int sizeInTilesMin;
+    public int sizeInTilesMax;
 }
 
 public class LevelGenerator : MonoBehaviour
 {
-    [SerializeField] GameObject dirtTilePrefab;
-    [SerializeField] Vector2 dirtTileSize;
-    [SerializeField] float groundHeightOffset;
-    [SerializeField] List<EnvObject> envObjects;
-    [SerializeField] List<GameObject> grassObjects;
-    [SerializeField] int levelSeed;
+    [SerializeField] Tilemap tileMap;
+    [SerializeField] LevelData data;
 
     private Camera mainCamera;
-    private Dictionary<Vector2Int, GameObject> tiles = new Dictionary<Vector2Int, GameObject>();
+    private Dictionary<Vector2Int, GameObject> chunks = new Dictionary<Vector2Int, GameObject>();
     private float groundHeight;
     private Tree tree;
 
     private void Start()
     {
-        if( levelSeed == 0 )
-            levelSeed = UnityEngine.Random.Range( 0, int.MaxValue - 1 );
+        if( data.levelSeed == 0 )
+            data.levelSeed = UnityEngine.Random.Range( 0, int.MaxValue - 1 );
 
         mainCamera = Camera.main;
-        //groundHeight = Camera.main.ViewportToWorldPoint( new Vector3( 0.0f, 1.0f, 0.0f ) ).y - dirtTileSize.y / 2.0f;
-        groundHeight = -( dirtTilePrefab.transform as RectTransform ).rect.size.y / 2.0f;
+        //groundHeight = Camera.main.ViewportToWorldPoint( new Vector3( 0.0f, 1.0f, 0.0f ) ).y - dirtChunkSize.y / 2.0f;
+        groundHeight = -( data.dirtChunkPrefab.transform as RectTransform ).rect.size.y / 2.0f;
         tree = FindObjectOfType<Tree>();
 
         for( int y = -1; y <= 1; y++ )
@@ -54,56 +54,80 @@ public class LevelGenerator : MonoBehaviour
     private void Update()
     {
         var cameraPos = mainCamera.transform.position;
-        var currentTile = new Vector2Int( ( int )( cameraPos.x / dirtTileSize.x ), ( int )( cameraPos.y / dirtTileSize.y ) );
+        var currentTile = new Vector2Int( ( int )( cameraPos.x / data.dirtChunkSize.x ), ( int )( cameraPos.y / data.dirtChunkSize.y ) );
         var cameraSize = mainCamera.ViewportToWorldPoint( new Vector3( 1.0f, 1.0f, 0.0f ) ) - cameraPos;
         var bounds = new Rect( cameraPos - cameraSize, cameraSize * 2.0f );
 
         for( int i = -1; i <= 1; i++ )
         {
-            TryConstructTile( new Vector2Int( RoundAwayFromZero( bounds.xMin / dirtTileSize.x ), currentTile.y + i ) );
-            TryConstructTile( new Vector2Int( RoundAwayFromZero( bounds.xMax / dirtTileSize.x ), currentTile.y + i ) );
-            TryConstructTile( new Vector2Int( currentTile.x + i, RoundAwayFromZero( ( bounds.yMin - Mathf.Sign( groundHeight ) ) / dirtTileSize.y ) ) );
-            TryConstructTile( new Vector2Int( currentTile.x + i, RoundAwayFromZero( ( bounds.yMax - Mathf.Sign( groundHeight ) ) / dirtTileSize.y ) ) );
+            TryConstructTile( new Vector2Int( RoundAwayFromZero( bounds.xMin / data.dirtChunkSize.x ), currentTile.y + i ) );
+            TryConstructTile( new Vector2Int( RoundAwayFromZero( bounds.xMax / data.dirtChunkSize.x ), currentTile.y + i ) );
+            TryConstructTile( new Vector2Int( currentTile.x + i, RoundAwayFromZero( ( bounds.yMin - Mathf.Sign( groundHeight ) ) / data.dirtChunkSize.y ) ) );
+            TryConstructTile( new Vector2Int( currentTile.x + i, RoundAwayFromZero( ( bounds.yMax - Mathf.Sign( groundHeight ) ) / data.dirtChunkSize.y ) ) );
         }
 
-        TryConstructTile( new Vector2Int( RoundAwayFromZero( bounds.xMin / dirtTileSize.x ), RoundAwayFromZero( ( bounds.yMin - Mathf.Sign( groundHeight ) ) / dirtTileSize.y ) ) );
-        TryConstructTile( new Vector2Int( RoundAwayFromZero( bounds.xMax / dirtTileSize.x ), RoundAwayFromZero( ( bounds.yMin - Mathf.Sign( groundHeight ) ) / dirtTileSize.y ) ) );
-        TryConstructTile( new Vector2Int( RoundAwayFromZero( bounds.xMin / dirtTileSize.x ), RoundAwayFromZero( ( bounds.yMax - Mathf.Sign( groundHeight ) ) / dirtTileSize.y ) ) );
-        TryConstructTile( new Vector2Int( RoundAwayFromZero( bounds.xMax / dirtTileSize.x ), RoundAwayFromZero( ( bounds.yMax - Mathf.Sign( groundHeight ) ) / dirtTileSize.y ) ) );
+        TryConstructTile( new Vector2Int( 
+            RoundAwayFromZero( bounds.xMin / data.dirtChunkSize.x ), 
+            RoundAwayFromZero( ( bounds.yMin - Mathf.Sign( groundHeight ) ) / data.dirtChunkSize.y ) ) );
+        TryConstructTile( new Vector2Int( 
+            RoundAwayFromZero( bounds.xMax / data.dirtChunkSize.x ), 
+            RoundAwayFromZero( ( bounds.yMin - Mathf.Sign( groundHeight ) ) / data.dirtChunkSize.y ) ) );
+        TryConstructTile( new Vector2Int( 
+            RoundAwayFromZero( bounds.xMin / data.dirtChunkSize.x ), 
+            RoundAwayFromZero( ( bounds.yMax - Mathf.Sign( groundHeight ) ) / data.dirtChunkSize.y ) ) );
+        TryConstructTile( new Vector2Int( 
+            RoundAwayFromZero( bounds.xMax / data.dirtChunkSize.x ), 
+            RoundAwayFromZero( ( bounds.yMax - Mathf.Sign( groundHeight ) ) / data.dirtChunkSize.y ) ) );
         TryConstructTile( currentTile );
     }
 
     private float RandomFromHash( int lseed )
     {
-        float seed = levelSeed * 0.4f + 23;
+        float seed = data.levelSeed * 0.4f + 23;
         seed *= 37 + lseed * 13;
         return xxHashSharp.xxHash.CalculateHash( BitConverter.GetBytes( seed ) ) / ( float )( uint.MaxValue - 1 );
     }
 
-    private void TryConstructTile( Vector2Int tile )
+    private bool RandomBoolFromHash( int lseed )
     {
-        if( tile.y > 0 || tiles.ContainsKey( tile ) || ( tile.x == 0 && tile.y == 0 ) )
+        float seed = data.levelSeed * 0.4f + 23;
+        seed *= 37 + lseed * 13;
+        return ( xxHashSharp.xxHash.CalculateHash( BitConverter.GetBytes( seed ) ) & 1 ) == 1;
+    }
+
+    private TKey RandomItem<TKey>( int lseed, HashSet<TKey> dict )
+    {
+        float seed = data.levelSeed * 0.4f + 23;
+        seed *= 37 + lseed * 13;
+        var rand = xxHashSharp.xxHash.CalculateHash( BitConverter.GetBytes( seed ) );
+        int idx = Utility.Mod( ( int )rand, dict.Count );
+        return dict.ElementAt( idx);
+    }
+
+    private void TryConstructTile( Vector2Int chunk )
+    {
+        if( chunk.y > 0 || chunks.ContainsKey( chunk ) || ( chunk.x == 0 && chunk.y == 0 ) )
             return;
 
-        var newTilePos = new Vector3( tile.x * dirtTileSize.x, groundHeight + tile.y * dirtTileSize.y, 0.0f );
-        var newTile = Instantiate( dirtTilePrefab, newTilePos, Quaternion.identity );
-        tiles.Add( tile, newTile );
+        var newChunkPos = new Vector3( chunk.x * data.dirtChunkSize.x, groundHeight + chunk.y * data.dirtChunkSize.y, 0.0f );
+        var newChunk = Instantiate( data.dirtChunkPrefab, newChunkPos, Quaternion.identity );
+        chunks.Add( chunk, newChunk );
 
-        ConstructEnvObjects( tile, newTile );
+        ConstructEnvObjects( chunk, newChunk );
 
-        ConstructGrass( tile, newTile );
+        ConstructGrass( chunk, newChunk );
 
         RemoveOldTiles();
     }
 
-    private void ConstructEnvObjects( Vector2Int tile, GameObject newTile )
+    private void ConstructEnvObjects( Vector2Int chunk, GameObject newChunk )
     {
-        var seedOffset = tile.x * 13 + tile.y * 5;
+        var seedOffset = chunk.x * 13 + chunk.y * 5;
 
-        if( tile.y >= 0 || ( tile.x == 0 && tile.y == 0 ) )
+        if( chunk.y >= 0 || ( chunk.x == 0 && chunk.y == 0 ) )
             return;
 
-        foreach( var env in envObjects )
+        foreach( var env in data.envObjects )
         {
             seedOffset += 11;
 
@@ -111,7 +135,7 @@ public class LevelGenerator : MonoBehaviour
             if( env.spawnChancePercent < random * 100.0f )
                 continue;
 
-            int numEnvObj = env.numPerTileMin + ( int )( RandomFromHash( 91 + seedOffset ) * ( env.numPerTileMax - env.numPerTileMin ) );
+            int numEnvObj = env.numPerChunkMin + ( int )( RandomFromHash( 91 + seedOffset ) * ( env.numPerChunkMax - env.numPerChunkMin ) );
             List<Pair<Vector2, float>> spawned = new()
             {
                 new Pair<Vector2, float>( tree.transform.position, 3.0f )
@@ -123,9 +147,9 @@ public class LevelGenerator : MonoBehaviour
                 Vector2? spawnPos = null;
                 do
                 {
-                    Vector2 randPos = newTile.transform.position.ToVector2() + new Vector2(
-                        ( RandomFromHash( 99945 + seedOffset + safety * 69 ) - 0.5f ) * dirtTileSize.x,
-                            ( RandomFromHash( 9345 + seedOffset + safety * 69 ) - 0.5f ) * dirtTileSize.y );
+                    Vector2 randPos = newChunk.transform.position.ToVector2() + new Vector2(
+                        ( RandomFromHash( 99945 + seedOffset + safety * 69 ) - 0.5f ) * data.dirtChunkSize.x,
+                        ( RandomFromHash( 9345 + seedOffset + safety * 69 ) - 0.5f ) * data.dirtChunkSize.y );
                     if( spawned.All( x => Vector2.SqrMagnitude( x.First - randPos ) >= Mathf.Pow( Mathf.Max( env.minDistBetween, x.Second ), 2.0f ) ) )
                         spawnPos = randPos;
                 }
@@ -134,8 +158,40 @@ public class LevelGenerator : MonoBehaviour
                 if( spawnPos.HasValue )
                 {
                     spawned.Add( new Pair<Vector2, float>( spawnPos.Value, env.minDistBetween ) );
-                    var envObj = Instantiate( env.obj, spawnPos.Value, Quaternion.Euler( 0.0f, 0.0f, UnityEngine.Random.value * Mathf.PI * 2.0f ) );
-                    envObj.transform.parent = newTile.transform;
+
+                    if( env.objPrefab != null )
+                    {
+                        var envObj = Instantiate( env.objPrefab, spawnPos.Value, Quaternion.Euler( 0.0f, 0.0f, UnityEngine.Random.value * Mathf.PI * 2.0f ) );
+                        envObj.transform.parent = newChunk.transform;
+                    }
+                    else
+                    {
+                        int numTiles = env.sizeInTilesMin + ( int )( RandomFromHash( 123331 + seedOffset ) * ( env.sizeInTilesMax - env.sizeInTilesMin ) );
+                        HashSet<Vector3Int> unvisited = new HashSet<Vector3Int>
+                        {
+                            tileMap.WorldToCell( spawnPos.Value )
+                        };
+                        HashSet<Vector3Int> visited = new HashSet<Vector3Int>();
+
+                        while( numTiles-- > 0 && unvisited.Count > 0 )
+                        {
+                            var cell = RandomItem( 991 + seedOffset + numTiles, unvisited );
+                            unvisited.Remove( cell );
+                            visited.Add( cell );
+                            tileMap.SetTile( cell, env.tilePrefab );
+                            tileMap.SetTile( cell + new Vector3Int( 1, 0, 0 ), env.tilePrefab );
+                            tileMap.SetTile( cell + new Vector3Int( 0, 1, 0 ), env.tilePrefab );
+                            tileMap.SetTile( cell + new Vector3Int( 1, 1, 0 ), env.tilePrefab );
+                            var horiz = RandomBoolFromHash( 211 + numTiles + seedOffset );
+                            var dir = RandomBoolFromHash( 2191 + numTiles + seedOffset );
+                            if( !visited.Contains( cell + new Vector3Int( 2, 0, 0 ) ) ) unvisited.Add( cell + new Vector3Int( 2, 0, 0 ) );
+                            if( !visited.Contains( cell + new Vector3Int( -2, 0, 0 ) ) ) unvisited.Add( cell + new Vector3Int( -2, 0, 0 ) );
+                            if( !visited.Contains( cell + new Vector3Int( 0, 2, 0 ) ) ) unvisited.Add( cell + new Vector3Int( 0, 2, 0 ) );
+                            if( !visited.Contains( cell + new Vector3Int( 0, -2, 0 ) ) ) unvisited.Add( cell + new Vector3Int( 0, -2, 0 ) );
+
+                            // TODO: Cell Removal
+                        }
+                    }
                 }
             }
         }
@@ -147,25 +203,25 @@ public class LevelGenerator : MonoBehaviour
         if( tile.y != 0 || tile.x == 0 )
             return;
 
-        var grass = Instantiate( grassObjects.RandomItem(), new Vector3( newTile.transform.position.x, 0.0f, 0.0f ), Quaternion.identity );
+        var grass = Instantiate( data.grassObjects.RandomItem(), new Vector3( newTile.transform.position.x, 0.0f, 0.0f ), Quaternion.identity );
         grass.transform.parent = newTile.transform.parent;
     }
 
     private void RemoveOldTiles( )
     {
         var currentTile = new Vector2Int(
-            RoundAwayFromZero( mainCamera.transform.position.x / dirtTileSize.x ),
-            RoundAwayFromZero( mainCamera.transform.position.y / dirtTileSize.y ) );
+            RoundAwayFromZero( mainCamera.transform.position.x / data.dirtChunkSize.x ),
+            RoundAwayFromZero( mainCamera.transform.position.y / data.dirtChunkSize.y ) );
 
         bool removed = true;
         while( removed )
         {
-            foreach( var (key, value) in tiles )
+            foreach( var (key, value) in chunks )
             {
                 removed = Mathf.Abs( key.x - currentTile.x ) > 2 || Mathf.Abs( key.y - currentTile.y ) > 2;
                 if( removed )
                 {
-                    tiles.Remove( key );
+                    chunks.Remove( key );
                     value.Destroy();
                     break;
                 }

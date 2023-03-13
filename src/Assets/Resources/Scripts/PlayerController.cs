@@ -4,6 +4,7 @@ using System.Linq;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.Tilemaps;
 
 public class Root
 {
@@ -50,6 +51,7 @@ public class PlayerController : EventReceiverInstance
     [SerializeField] GameConstants gameConstants;
     [SerializeField] LayerMask allowPlacementLayer;
     [SerializeField] GameObject gameOverScreen;
+    [SerializeField] Tilemap tileMap;
     public GameState gameState = GameState.Menu;
 
     private Camera mainCamera;
@@ -351,6 +353,7 @@ public class PlayerController : EventReceiverInstance
     private void ProcessRootPlacement()
     {
         var mousePos = mainCamera.ScreenToWorldPoint( Utility.GetMouseOrTouchPos() );
+        var rootType = newRoot.obj.GetComponent<BaseRoot>();
 
         // Positioning
         if( newRoot.spline != null )
@@ -381,41 +384,64 @@ public class PlayerController : EventReceiverInstance
         bool validAngle = true;
         bool validCollision = colliderList.All( x =>
         {
-            return x.gameObject == newRoot.obj ||
+            if( x.gameObject == newRoot.obj ||
                 x.transform.IsChildOf( newRoot.obj.transform ) ||
-                ( ( 1 << x.gameObject.layer ) & allowPlacementLayer.value ) != 0 ||
-                ( isFirstConnection && x.CompareTag("Tree") );
+                ( ( 1 << x.gameObject.layer ) & allowPlacementLayer.value ) != 0 )
+                return true;
+
+            if( rootType != null && rootType.placementTagRequirement.Length > 0 && rootType.placementRequirement != null )
+            {
+                List<Collider2D> placementColliders = new List<Collider2D>();
+                rootType.placementRequirement.OverlapCollider( new ContactFilter2D().NoFilter(), placementColliders );
+                if( colliderList.IsEmpty() )
+                    return false;
+
+                bool foundRequiredPlacement = false;
+                foreach( var y in colliderList )
+                {
+                    if( y.gameObject == tileMap.gameObject )
+                    {
+                        List<ContactPoint2D> contacts = new List<ContactPoint2D>();
+                        rootType.placementRequirement.GetContacts( contacts );
+
+                        if( contacts.All( c => tileMap.GetInstantiatedObject( tileMap.WorldToCell( c.point ) ).
+                            CompareTag( rootType.placementTagRequirement ) ) )
+                        {
+                            foundRequiredPlacement = true;
+                        }
+                    }
+                    else if( y.gameObject != newRoot.obj && !y.transform.IsChildOf( newRoot.obj.transform ) )
+                    {
+                        return false;
+                    }
+                }
+
+                return foundRequiredPlacement;
+            }
+
+            return false;
         } );
 
         if( newRoot.spline != null && validCollision )
         {
-            for( int i = 0; i < newRoot.spline.pathCreator.bezierPath.NumPoints - 2; ++i )
+            for( int i = 0; i < newRoot.spline.pathCreator.bezierPath.NumAnchorPoints - 1 && validCollision; ++i )
             {
-                var a1 = newRoot.spline.pathCreator.bezierPath.GetPoint( i );
-                var a2 = newRoot.spline.pathCreator.bezierPath.GetPoint( i + 1 );
-                for( int j = 0; j < newRoot.spline.pathCreator.bezierPath.NumPoints - 2; ++j )
+                var a1 = newRoot.spline.pathCreator.bezierPath.GetPoint( i * 3 );
+                var a2 = newRoot.spline.pathCreator.bezierPath.GetPoint( i * 3 + 3 );
+                for( int j = 0; j < newRoot.spline.pathCreator.bezierPath.NumAnchorPoints - 1; ++j )
                 {
-                    if( Math.Abs( i - j ) < 3 )
+                    if( Math.Abs( i - j ) < 2 )
                         continue;
 
-                    var b1 = newRoot.spline.pathCreator.bezierPath.GetPoint( j );
-                    var b2 = newRoot.spline.pathCreator.bezierPath.GetPoint( j + 1 );
-                    if( LineLineIntersection( a1, a2 - a1, b2, b2 - b1 ) )
+                    var b1 = newRoot.spline.pathCreator.bezierPath.GetPoint( j * 3 );
+                    var b2 = newRoot.spline.pathCreator.bezierPath.GetPoint( j * 3 + 3 );
+                    if( LineLineIntersection( a1, a2 - a1, b1, b2 - b1 ) )
                     {
                         validCollision = false;
                         break;
                     }
                 }
             }
-        }
-
-        var rootType = newRoot.obj.GetComponent<BaseRoot>();
-
-        if( validCollision && rootType != null && rootType.placementTagRequirement.Length > 0 && rootType.placementRequirement != null )
-        {
-            colliderList.Clear();
-            rootType.placementRequirement.OverlapCollider( new ContactFilter2D().NoFilter(), colliderList );
-            validCollision = colliderList.Any( x => x.CompareTag( rootType.placementTagRequirement ) );
         }
 
         bool validPlacement = validCollision && validAngle;

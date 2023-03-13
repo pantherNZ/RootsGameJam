@@ -1,0 +1,45 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6f9db583be7d9b242b737373b24d802c, type: 3}
+  m_Name: LevelData
+  m_EditorClassIdentifier: 
+  envObjects:
+  - spawnChancePercent: 100
+    numPerChunkMin: 1
+    numPerChunkMax: 1
+    minDistBetween: 1
+    tilePrefab: {fileID: 11400000, guid: 23ec6467074ad1248905f26f7a2ee991, type: 2}
+    objPrefab: {fileID: 0}
+    sizeInTilesMin: 4
+    sizeInTilesMax: 8
+  - spawnChancePercent: 20
+    numPerChunkMin: 0
+    numPerChunkMax: 0
+    minDistBetween: 5
+    tilePrefab: {fileID: 11400000, guid: 8b173876b4f5cf343b74d7cb1e555f5b, type: 2}
+    objPrefab: {fileID: 0}
+    sizeInTilesMin: 0
+    sizeInTilesMax: 0
+  - spawnChancePercent: 10
+    numPerChunkMin: 0
+    numPerChunkMax: 0
+    minDistBetween: 5
+    tilePrefab: {fileID: 11400000, guid: 185b70c2008d0a94fb4d2d1698622239, type: 2}
+    objPrefab: {fileID: 0}
+    sizeInTilesMin: 0
+    sizeInTilesMax: 0
+  grassObjects:
+  - {fileID: 8147382061277889737, guid: 11ec5994d3a37fb4db1f83d992400015, type: 3}
+  dirtChunkPrefab: {fileID: 4337772714998171061, guid: e132f1ec05a86d14e8a394455c93cc09, type: 3}
+  dirtChunkSize: {x: 17.5, y: 10.777}
+  groundHeightOffset: 0
+  levelSeed: 934905912
