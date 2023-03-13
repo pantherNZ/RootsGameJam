@@ -13,8 +13,8 @@ MonoBehaviour:
   m_Name: DirtTileRule
   m_EditorClassIdentifier: 
   m_DefaultSprite: {fileID: 21300000, guid: 393e475d68e06ea4bbae4b1022e5a72e, type: 3}
-  m_DefaultGameObject: {fileID: 0}
-  m_DefaultColliderType: 0
+  m_DefaultGameObject: {fileID: 4741094516848325901, guid: d5e26f50d2701784280175ebb93c926b, type: 3}
+  m_DefaultColliderType: 2
   m_TilingRules:
   - m_Id: 0
     m_Sprites:

@@ -229,7 +229,6 @@ public class PlayerController : EventReceiverInstance
                 var newSpline = Instantiate( rootType ).GetComponent<RootMeshCreator>();
                 newSpline.transform.position = currentConnection.transform.position;
                 newSpline.pathCreator.InitializeEditorData( true );
-                newSpline.collisionDistOffset = 1.5f; // Prevent collision with tree
                 newSpline.TriggerUpdate();
 
                 newRoot = new Root()
@@ -259,7 +258,6 @@ public class PlayerController : EventReceiverInstance
             {
                 var pos = currentConnection.transform.position + currentConnection.transform.forward * 1.0f;
                 spline.pathCreator.bezierPath.AddSegmentToEnd( pos );
-                spline.collisionDistOffset = 1.5f; // Prevent collision with tree
                 spline.TriggerUpdate();
 
                 newRoot = new Root()

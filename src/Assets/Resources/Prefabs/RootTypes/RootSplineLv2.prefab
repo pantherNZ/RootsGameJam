@@ -227,6 +227,7 @@ MonoBehaviour:
   textureTiling: 0.3
   scaleTilingByLength: 1
   textureTilingFinal: 0.3
+  collisionDistOffset: 1.5
   meshHolder: {fileID: 4411192391854136089}
 --- !u!114 &304646283082999509
 MonoBehaviour:

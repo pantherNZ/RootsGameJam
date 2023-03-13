@@ -26,20 +26,20 @@ public class LevelGenerator : MonoBehaviour
     private Dictionary<Vector2Int, GameObject> chunks = new Dictionary<Vector2Int, GameObject>();
     private float groundHeight;
     private Tree tree;
+    private int levelSeed;
 
     private void Start()
     {
         if( data.levelSeed == 0 )
-            data.levelSeed = UnityEngine.Random.Range( 0, int.MaxValue - 1 );
+            levelSeed = UnityEngine.Random.Range( 0, int.MaxValue - 1 );
 
         mainCamera = Camera.main;
-        //groundHeight = Camera.main.ViewportToWorldPoint( new Vector3( 0.0f, 1.0f, 0.0f ) ).y - dirtChunkSize.y / 2.0f;
         groundHeight = -( data.dirtChunkPrefab.transform as RectTransform ).rect.size.y / 2.0f;
         tree = FindObjectOfType<Tree>();
 
-        for( int y = -1; y <= 1; y++ )
+        for( int y = -data.initGenerateChunks; y <= data.initGenerateChunks; y++ )
         {
-            for( int x = -1; x <= 1; x++ )
+            for( int x = -data.initGenerateChunks; x <= data.initGenerateChunks; x++ )
             {
                 TryConstructTile( new Vector2Int( x, y ) );
             }
@@ -83,21 +83,21 @@ public class LevelGenerator : MonoBehaviour
 
     private float RandomFromHash( int lseed )
     {
-        float seed = data.levelSeed * 0.4f + 23;
+        float seed = levelSeed * 0.4f + 23;
         seed *= 37 + lseed * 13;
         return xxHashSharp.xxHash.CalculateHash( BitConverter.GetBytes( seed ) ) / ( float )( uint.MaxValue - 1 );
     }
 
     private bool RandomBoolFromHash( int lseed )
     {
-        float seed = data.levelSeed * 0.4f + 23;
+        float seed = levelSeed * 0.4f + 23;
         seed *= 37 + lseed * 13;
         return ( xxHashSharp.xxHash.CalculateHash( BitConverter.GetBytes( seed ) ) & 1 ) == 1;
     }
 
     private TKey RandomItem<TKey>( int lseed, HashSet<TKey> dict )
     {
-        float seed = data.levelSeed * 0.4f + 23;
+        float seed = levelSeed * 0.4f + 23;
         seed *= 37 + lseed * 13;
         var rand = xxHashSharp.xxHash.CalculateHash( BitConverter.GetBytes( seed ) );
         int idx = Utility.Mod( ( int )rand, dict.Count );
@@ -214,11 +214,12 @@ public class LevelGenerator : MonoBehaviour
             RoundAwayFromZero( mainCamera.transform.position.y / data.dirtChunkSize.y ) );
 
         bool removed = true;
-        while( removed )
+        while( removed && !chunks.IsEmpty() )
         {
             foreach( var (key, value) in chunks )
             {
-                removed = Mathf.Abs( key.x - currentTile.x ) > 2 || Mathf.Abs( key.y - currentTile.y ) > 2;
+                removed = Mathf.Abs( key.x - currentTile.x ) > data.initGenerateChunks + 1 || 
+                    Mathf.Abs( key.y - currentTile.y ) > data.initGenerateChunks + 1;
                 if( removed )
                 {
                     chunks.Remove( key );

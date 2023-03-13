@@ -12,4 +12,5 @@ public class LevelData : ScriptableObject
     public Vector2 dirtChunkSize;
     public float groundHeightOffset;
     public int levelSeed;
+    public int initGenerateChunks = 1;
 }
