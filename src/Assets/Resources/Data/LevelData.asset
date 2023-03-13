@@ -14,6 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   envObjects:
   - spawnChancePercent: 10
+    spawnChancePercentPerChunkDepth: 0
     numPerChunkMin: 1
     numPerChunkMax: 1
     minDistBetween: 1
@@ -22,6 +23,7 @@ MonoBehaviour:
     sizeInTilesMin: 1
     sizeInTilesMax: 6
   - spawnChancePercent: 8
+    spawnChancePercentPerChunkDepth: 0
     numPerChunkMin: 1
     numPerChunkMax: 1
     minDistBetween: 5
@@ -30,6 +32,7 @@ MonoBehaviour:
     sizeInTilesMin: 1
     sizeInTilesMax: 6
   - spawnChancePercent: 10
+    spawnChancePercentPerChunkDepth: 0
     numPerChunkMin: 1
     numPerChunkMax: 5
     minDistBetween: 1
@@ -43,4 +46,4 @@ MonoBehaviour:
   dirtChunkSize: {x: 17.5, y: 10.777}
   groundHeightOffset: 0
   levelSeed: 13434
-  initGenerateChunks: 10
+  initGenerateChunks: 1

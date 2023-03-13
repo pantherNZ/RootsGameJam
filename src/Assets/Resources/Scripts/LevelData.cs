@@ -3,6 +3,20 @@ using System.Collections.Generic;
 using UnityEngine;
 
 [Serializable]
+public class EnvObject
+{
+    public float spawnChancePercent;
+    public float spawnChancePercentPerChunkDepth;
+    public int numPerChunkMin;
+    public int numPerChunkMax;
+    public float minDistBetween;
+    public RuleTile tilePrefab;
+    public GameObject objPrefab;
+    public int sizeInTilesMin;
+    public int sizeInTilesMax;
+}
+
+[Serializable]
 [CreateAssetMenu( fileName = "LevelData", menuName = "ScriptableObjs/LevelData" )]
 public class LevelData : ScriptableObject
 {

@@ -4,19 +4,6 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Tilemaps;
 
-[Serializable]
-public class EnvObject
-{
-    public int spawnChancePercent;
-    public int numPerChunkMin;
-    public int numPerChunkMax;
-    public float minDistBetween;
-    public RuleTile tilePrefab;
-    public GameObject objPrefab;
-    public int sizeInTilesMin;
-    public int sizeInTilesMax;
-}
-
 public class LevelGenerator : MonoBehaviour
 {
     [SerializeField] Tilemap tileMap;
@@ -46,12 +33,13 @@ public class LevelGenerator : MonoBehaviour
         }
     }
 
-    private int RoundAwayFromZero( float f )
+    private void Update()
     {
-        return ( int )( f + Mathf.Sign( f ) * 0.5f );
+        AddNewTiles();
+        RemoveOldTiles();
     }
 
-    private void Update()
+    private void AddNewTiles()
     {
         var cameraPos = mainCamera.transform.position;
         var currentTile = new Vector2Int( ( int )( cameraPos.x / data.dirtChunkSize.x ), ( int )( cameraPos.y / data.dirtChunkSize.y ) );
@@ -66,42 +54,19 @@ public class LevelGenerator : MonoBehaviour
             TryConstructTile( new Vector2Int( currentTile.x + i, RoundAwayFromZero( ( bounds.yMax - Mathf.Sign( groundHeight ) ) / data.dirtChunkSize.y ) ) );
         }
 
-        TryConstructTile( new Vector2Int( 
-            RoundAwayFromZero( bounds.xMin / data.dirtChunkSize.x ), 
+        TryConstructTile( new Vector2Int(
+            RoundAwayFromZero( bounds.xMin / data.dirtChunkSize.x ),
             RoundAwayFromZero( ( bounds.yMin - Mathf.Sign( groundHeight ) ) / data.dirtChunkSize.y ) ) );
-        TryConstructTile( new Vector2Int( 
-            RoundAwayFromZero( bounds.xMax / data.dirtChunkSize.x ), 
+        TryConstructTile( new Vector2Int(
+            RoundAwayFromZero( bounds.xMax / data.dirtChunkSize.x ),
             RoundAwayFromZero( ( bounds.yMin - Mathf.Sign( groundHeight ) ) / data.dirtChunkSize.y ) ) );
-        TryConstructTile( new Vector2Int( 
-            RoundAwayFromZero( bounds.xMin / data.dirtChunkSize.x ), 
+        TryConstructTile( new Vector2Int(
+            RoundAwayFromZero( bounds.xMin / data.dirtChunkSize.x ),
             RoundAwayFromZero( ( bounds.yMax - Mathf.Sign( groundHeight ) ) / data.dirtChunkSize.y ) ) );
-        TryConstructTile( new Vector2Int( 
-            RoundAwayFromZero( bounds.xMax / data.dirtChunkSize.x ), 
+        TryConstructTile( new Vector2Int(
+            RoundAwayFromZero( bounds.xMax / data.dirtChunkSize.x ),
             RoundAwayFromZero( ( bounds.yMax - Mathf.Sign( groundHeight ) ) / data.dirtChunkSize.y ) ) );
         TryConstructTile( currentTile );
-    }
-
-    private float RandomFromHash( int lseed )
-    {
-        float seed = levelSeed * 0.4f + 23;
-        seed *= 37 + lseed * 13;
-        return xxHashSharp.xxHash.CalculateHash( BitConverter.GetBytes( seed ) ) / ( float )( uint.MaxValue - 1 );
-    }
-
-    private bool RandomBoolFromHash( int lseed )
-    {
-        float seed = levelSeed * 0.4f + 23;
-        seed *= 37 + lseed * 13;
-        return ( xxHashSharp.xxHash.CalculateHash( BitConverter.GetBytes( seed ) ) & 1 ) == 1;
-    }
-
-    private TKey RandomItem<TKey>( int lseed, HashSet<TKey> dict )
-    {
-        float seed = levelSeed * 0.4f + 23;
-        seed *= 37 + lseed * 13;
-        var rand = xxHashSharp.xxHash.CalculateHash( BitConverter.GetBytes( seed ) );
-        int idx = Utility.Mod( ( int )rand, dict.Count );
-        return dict.ElementAt( idx);
     }
 
     private void TryConstructTile( Vector2Int chunk )
@@ -116,8 +81,6 @@ public class LevelGenerator : MonoBehaviour
         ConstructEnvObjects( chunk, newChunk );
 
         ConstructGrass( chunk, newChunk );
-
-        RemoveOldTiles();
     }
 
     private void ConstructEnvObjects( Vector2Int chunk, GameObject newChunk )
@@ -132,7 +95,8 @@ public class LevelGenerator : MonoBehaviour
             seedOffset += 11;
 
             float random = RandomFromHash( 1211 + seedOffset );
-            if( env.spawnChancePercent < random * 100.0f )
+            float spawnChance = env.spawnChancePercent + env.spawnChancePercentPerChunkDepth * Math.Abs( chunk.y );
+            if( spawnChance < random * 100.0f )
                 continue;
 
             int numEnvObj = env.numPerChunkMin + ( int )( RandomFromHash( 91 + seedOffset ) * ( env.numPerChunkMax - env.numPerChunkMin ) );
@@ -188,8 +152,6 @@ public class LevelGenerator : MonoBehaviour
                             if( !visited.Contains( cell + new Vector3Int( -2, 0, 0 ) ) ) unvisited.Add( cell + new Vector3Int( -2, 0, 0 ) );
                             if( !visited.Contains( cell + new Vector3Int( 0, 2, 0 ) ) ) unvisited.Add( cell + new Vector3Int( 0, 2, 0 ) );
                             if( !visited.Contains( cell + new Vector3Int( 0, -2, 0 ) ) ) unvisited.Add( cell + new Vector3Int( 0, -2, 0 ) );
-
-                            // TODO: Cell Removal
                         }
                     }
                 }
@@ -223,10 +185,51 @@ public class LevelGenerator : MonoBehaviour
                 if( removed )
                 {
                     chunks.Remove( key );
+                    var botLeft = ( value.transform as RectTransform ).GetWorldRect().BottomLeft();
+                    var topRight = ( value.transform as RectTransform ).GetWorldRect().TopRight();
+
+                    for( float x = botLeft.x; x <= topRight.x; x++ )
+                    {
+                        for( float y = botLeft.y; y <= topRight.y; y++ )
+                        {
+                            tileMap.SetTile( tileMap.WorldToCell( new Vector3( x, y, 0.0f ) ), null );
+                        }
+                    }
+                    
                     value.Destroy();
                     break;
                 }
             }
         }
     }
+
+    // Utility ---------------
+    private int RoundAwayFromZero( float f )
+    {
+        return ( int )( f + Mathf.Sign( f ) * 0.5f );
+    }
+
+    private float RandomFromHash( int lseed )
+    {
+        float seed = levelSeed * 0.4f + 23;
+        seed *= 37 + lseed * 13;
+        return xxHashSharp.xxHash.CalculateHash( BitConverter.GetBytes( seed ) ) / ( float )( uint.MaxValue - 1 );
+    }
+
+    private bool RandomBoolFromHash( int lseed )
+    {
+        float seed = levelSeed * 0.4f + 23;
+        seed *= 37 + lseed * 13;
+        return ( xxHashSharp.xxHash.CalculateHash( BitConverter.GetBytes( seed ) ) & 1 ) == 1;
+    }
+
+    private TKey RandomItem<TKey>( int lseed, HashSet<TKey> dict )
+    {
+        float seed = levelSeed * 0.4f + 23;
+        seed *= 37 + lseed * 13;
+        var rand = xxHashSharp.xxHash.CalculateHash( BitConverter.GetBytes( seed ) );
+        int idx = Utility.Mod( ( int )rand, dict.Count );
+        return dict.ElementAt( idx );
+    }
+    // Utility ---------------
 }
