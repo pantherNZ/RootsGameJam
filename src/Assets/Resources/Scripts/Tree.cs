@@ -1,21 +1,43 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Tree : MonoBehaviour
+public interface IDamageDealer
+{
+    abstract void DispatchDamage( IDamageable to, int damage, DamageType type );
+}
+
+public interface IDamageable
+{
+    abstract void ReceiveDamage( IDamageDealer from, int damage, DamageType type );
+}
+
+[Serializable]
+public struct TreeStats
+{
+    public int health;
+    public int maxHealth;
+    public int armour;
+    public int maxArmour;
+}
+
+public class Tree : MonoBehaviour, IDamageable
 {
     [SerializeField] float spinSpeed;
-    [SerializeField] int maxHealth;
+    [SerializeField] GameConstants constants;
     [SerializeField] GameObject treeLevelUpObj;
     [SerializeField] Color treeHighlightColour;
     [SerializeField] PlayerController controller;
-    private int health;
+    private TreeStats stats;
     private Color baseColour;
     private bool hovered = false;
+    // <Old health, new health, modified by> 
+    public event Action<TreeStats, TreeStats, DamageType> OnHealthChanged;
 
     private void Start()
     {
-        health = maxHealth;
+        stats = constants.treeInitialStats;
         var sprite = treeLevelUpObj.GetComponent<SpriteRenderer>();
         baseColour = sprite.color;
 
@@ -48,11 +70,13 @@ public class Tree : MonoBehaviour
             treeLevelUpObj.transform.Rotate( 0.0f, 0.0f, spinSpeed * Time.deltaTime, Space.Self );
     }
 
-    public void ReceiveDamage( int damage, DamageType type )
+    public void ReceiveDamage( IDamageDealer from, int damage, DamageType type )
     {
-        health = Mathf.Max( 0, damage );
+        var oldHp = stats;
+        stats.health = Mathf.Max( 0, damage );
+        OnHealthChanged?.Invoke( oldHp, stats, type );
 
-        if( health <= 0 )
+        if( stats.health <= 0 )
         {
             EventSystem.Instance.TriggerEvent( new GameOverEvent() );
         }

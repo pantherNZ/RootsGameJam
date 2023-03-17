@@ -50,4 +50,5 @@ public class GameConstants : ScriptableObject
     public List<BaseRoot> rootTypes;
     public float menuSlerpSpeed;
     public float maxPlaceYValue;
+    public TreeStats treeInitialStats;
 }

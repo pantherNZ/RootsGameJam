@@ -76,3 +76,8 @@ MonoBehaviour:
   - {fileID: 9092125598873235104, guid: 5c083c2b7065b5a49a0bc76853dce403, type: 3}
   menuSlerpSpeed: 0.5
   maxPlaceYValue: -2
+  treeInitialStats:
+    health: 100
+    maxHealth: 100
+    armour: 0
+    maxArmour: 0
