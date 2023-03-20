@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
+[ExecuteInEditMode]
 public class RootConnection : MonoBehaviour
 {
     public Root parent;
@@ -12,6 +13,7 @@ public class RootConnection : MonoBehaviour
     [ReadOnly]
     public int currentConnections = 1;
     public float tValue = 1.0f;
+    public float distFromEnd = 0.0f;
     public float? distAlongPath;
     public bool autoUpdatePos = true;
 
@@ -39,17 +41,20 @@ public class RootConnection : MonoBehaviour
 
     public void UpdatePosition()
     {
+        float distanceToUse;
+
         if( distAlongPath.HasValue )
         {
-            transform.SetPositionAndRotation(
-                  spline.path.GetPointAtDistance( distAlongPath.Value, PathCreation.EndOfPathInstruction.Stop ),
-                  spline.path.GetRotationAtDistance( distAlongPath.Value, PathCreation.EndOfPathInstruction.Stop ) );
+            distanceToUse = distAlongPath.Value;
         }
         else
         {
-            transform.SetPositionAndRotation(
-                   spline.path.GetPointAtTime( tValue, PathCreation.EndOfPathInstruction.Stop ),
-                   spline.path.GetRotation( tValue, PathCreation.EndOfPathInstruction.Stop ) );
+            distanceToUse = spline.path.GetClosestDistanceAlongPath( spline.path.GetPointAtTime( tValue, PathCreation.EndOfPathInstruction.Stop ) );
+            distanceToUse -= distFromEnd;
         }
+
+        transform.SetPositionAndRotation(
+                spline.path.GetPointAtDistance( distanceToUse, PathCreation.EndOfPathInstruction.Stop ),
+                spline.path.GetRotationAtDistance( distanceToUse, PathCreation.EndOfPathInstruction.Stop ) );
     }
 }

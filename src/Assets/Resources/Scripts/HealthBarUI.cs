@@ -6,10 +6,10 @@ public class HealthBarUI : MonoBehaviour
 {
     [SerializeField] ValueBarUI bar;
     [SerializeField] Tree tree;
-    [SerializeField] GameConstants constants;
 
     private void Start()
     {
+        var constants = GameController.Instance.Constants;
         bar.SetValue( constants.treeInitialStats.health, constants.treeInitialStats.maxHealth );
     }
 

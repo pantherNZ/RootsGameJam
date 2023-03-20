@@ -20,8 +20,12 @@ public class GameController : MonoBehaviour
     private float currentTimeHours = 6.0f;
     private List<int> validLayers = new List<int>();
 
+    public static GameController Instance { get; private set; }
+    public GameConstants Constants { get => constants; private set { } }
+
     private void Start()
     {
+        Instance = this;
         player = FindObjectOfType<PlayerController>();
 
         currentTimeHours = waveData.startHour;

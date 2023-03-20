@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 6502692289256205315}
   - component: {fileID: 9092125598873235104}
   m_Layer: 0
-  m_Name: NutrientRootSpecialty
+  m_Name: RichNutrientRoot
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -45,29 +45,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c388287747e9fd04f8f694358dfc91b2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  rootName: Rich Nutrient Root
-  description: Gathers 20 Food per second, must be placed in fertile soil
-  cost:
-    food: 50
-    water: 150
-    energy: 0
-  icon: {fileID: 2800000, guid: 13e04c38abb13064faf0dda4182cbe10, type: 3}
-  isPlaced: 0
-  requiredLevel: 2
-  placementLayerRequirement:
-    serializedVersion: 2
-    m_Bits: 0
+  type: {fileID: 11400000, guid: 7d64ea58f94681840a9c234f0a67da4f, type: 2}
   placementRequirement: {fileID: 0}
-  gatherTimeSec: 0.2
-  consume:
-    food: 0
-    water: 0
-    energy: 0
-  gain:
-    food: 4
-    water: 0
-    energy: 0
-  showGainToastUI: 0
+  isPlaced: 0
+  sprites: []
 --- !u!1 &5874525479893708746
 GameObject:
   m_ObjectHideFlags: 0

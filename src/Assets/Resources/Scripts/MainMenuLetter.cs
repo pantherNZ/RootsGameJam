@@ -4,8 +4,6 @@ using UnityEngine;
 
 public class MainMenuLetter : MonoBehaviour
 {
-    [SerializeField] GameConstants constants;
-
     private Camera mainCamera;
     private float moveTimeBase = 1.0f;
     private float moveTimeRand = 0.5f;
@@ -13,6 +11,7 @@ public class MainMenuLetter : MonoBehaviour
 
     private void Start()
     {
+        var constants = GameController.Instance.Constants;
         moveTimeBase = constants.menuSlerpSpeed;
         moveTimeRand = constants.menuSlerpSpeed / 4.0f;
 

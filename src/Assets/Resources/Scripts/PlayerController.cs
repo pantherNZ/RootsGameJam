@@ -10,13 +10,11 @@ public class Root
 {
     public GameObject obj;
     public SpriteRenderer sprite;
-    public MeshRenderer mesh;
     public Collider2D collision;
     public List<Root> children = new List<Root>();
     public Root parent;
-    public Color baseCol;
     public RootMeshCreator spline;
-    public BaseRoot rootType;
+    public BaseRoot rootObject;
     public Vector3 fromPos;
     public int depth;
 }
@@ -47,8 +45,6 @@ public class PlayerController : EventReceiverInstance
     [SerializeField] TMPro.TextMeshProUGUI levelUI;
     [SerializeField] GameObject gainResourceUIPrefab;
     [SerializeField] float menuFadeOutTime = 1.0f;
-    [SerializeField] Color invalidPlacementColour = Color.red;
-    [SerializeField] GameConstants gameConstants;
     [SerializeField] LayerMask allowPlacementLayer;
     [SerializeField] GameObject gameOverScreen;
     [SerializeField] Tilemap tileMap;
@@ -75,14 +71,13 @@ public class PlayerController : EventReceiverInstance
         if( gameState == GameState.Menu )
             ShowMenu();
 
-        currentResource = gameConstants.startingResource;
-        maxResource = gameConstants.startingMaxResource;
+        currentResource = GameController.Instance.Constants.startingResource;
+        maxResource = GameController.Instance.Constants.startingMaxResource;
 
         // Find root connections and listen to their click event
         var rootConnections = FindObjectsOfType<RootConnection>();
 
         ListenToConnections( rootConnections );
-        SetupRootTypeUIOptions();
 
         UpdateBars();
 
@@ -106,6 +101,9 @@ public class PlayerController : EventReceiverInstance
 
     public override void OnEventReceived( IBaseEvent e )
     {
+        if( gameState != GameState.Game )
+            return;
+
         if( e is GainResourcesEvent gain )
         {
             if( ( maxResource + gain.res ).IsValid() )
@@ -205,9 +203,10 @@ public class PlayerController : EventReceiverInstance
             return;
 
         // Show UI
+        currentConnection = connection;
+        SetupRootTypeUIOptions();
         rootSelectionUI.SetActive( true );
         ( rootSelectionUI.transform as RectTransform ).anchoredPosition = mainCamera.WorldToScreenPoint( connection.transform.position );
-        currentConnection = connection;
 
         foreach( Transform t in rootSelectionUIContent.transform )
         {
@@ -240,7 +239,7 @@ public class PlayerController : EventReceiverInstance
                     collision = newSpline.gameObject.GetComponentInChildren<Collider2D>(),
                     spline = newSpline,
                     parent = currentConnection.parent,
-                    rootType = rootType,
+                    rootObject = newSpline.gameObject.GetComponent<BaseRoot>(),
                     depth = currentConnection.parent.depth + 1,
                     fromPos = currentConnection.transform.position,
                 };
@@ -249,12 +248,6 @@ public class PlayerController : EventReceiverInstance
                 ListenToConnections( connections );
                 foreach( var connection in connections )
                     connection.parent = newRoot;
-
-                Utility.FunctionTimer.CreateTimer( 0.1f, () =>
-                {
-                    newRoot.mesh = newSpline.GetComponentInChildren<MeshRenderer>();
-                    newRoot.baseCol = newRoot.mesh.material.GetColor( "_Colour" );
-                } );
             }
             // Extend the existing spline
             else
@@ -269,7 +262,7 @@ public class PlayerController : EventReceiverInstance
                     collision = spline.gameObject.GetComponentInChildren<Collider2D>(),
                     spline = spline,
                     parent = currentConnection.parent,
-                    rootType = rootType,
+                    rootObject = spline.gameObject.GetComponent<BaseRoot>(),
                     depth = currentConnection.parent.depth + 1,
                     fromPos = spline.pathCreator.path.LocalToWorld( 
                         spline.pathCreator.bezierPath.GetPoint( spline.pathCreator.bezierPath.NumPoints - 4 ) ),
@@ -291,9 +284,6 @@ public class PlayerController : EventReceiverInstance
                     newConnection.tValue = tValueStart + ( 1.0f - tValueStart ) * newConnection.tValue;
                     ListenToConnections( new RootConnection[] { newConnection } );
                 }
-
-                newRoot.mesh = spline.GetComponentInChildren<MeshRenderer>();
-                newRoot.baseCol = newRoot.mesh.material.GetColor( "_Colour" );
             }
         }
         else
@@ -306,13 +296,12 @@ public class PlayerController : EventReceiverInstance
                 sprite = rootObj.GetComponentInChildren<SpriteRenderer>(),
                 collision = rootObj.GetComponentInChildren<Collider2D>(),
                 parent = currentConnection.parent,
-                rootType = rootObj.GetComponent<BaseRoot>(),
+                rootObject = rootObj.GetComponent<BaseRoot>(),
                 depth = currentConnection.parent.depth + 1,
             };
 
             var depth = ( currentConnection.parent == null ||
                 currentConnection.parent.sprite == null ) ? 49 : currentConnection.parent.sprite.sortingOrder - 1;
-            newRoot.baseCol = newRoot.sprite.color;
             newRoot.sprite.sortingOrder = depth;
             newRoot.obj.transform.position = currentConnection.transform.position;
         }
@@ -361,11 +350,11 @@ public class PlayerController : EventReceiverInstance
         {
             var path = newRoot.spline.pathCreator.bezierPath;
             var offset = ( mousePos - newRoot.fromPos ).SetZ( 0.0f );
-            if( newRoot.rootType.lengthMax > 0.0 )
-                offset = offset.Clamp( newRoot.rootType.lengthMin, newRoot.rootType.lengthMax );
+            if( newRoot.rootObject.type.lengthMax > 0.0 )
+                offset = offset.Clamp( newRoot.rootObject.type.lengthMin, newRoot.rootObject.type.lengthMax );
             var result = newRoot.fromPos + offset;
-            if( result.y > gameConstants.maxPlaceYValue )
-                result.y = gameConstants.maxPlaceYValue;
+            if( result.y > GameController.Instance.Constants.maxPlaceYValue )
+                result.y = GameController.Instance.Constants.maxPlaceYValue;
             var localPos = newRoot.spline.pathCreator.path.WorldToLocal( result );
             path.MovePoint( path.NumPoints - 1, localPos );
             newRoot.spline.TriggerUpdate();
@@ -390,7 +379,7 @@ public class PlayerController : EventReceiverInstance
                 ( ( 1 << x.gameObject.layer ) & allowPlacementLayer.value ) != 0 )
                 return true;
 
-            if( rootType != null && rootType.placementTagRequirement.Length > 0 && rootType.placementRequirement != null )
+            if( rootType != null && rootType.type.placementTagRequirement.Length > 0 && rootType.placementRequirement != null )
             {
                 List<Collider2D> placementColliders = new List<Collider2D>();
                 rootType.placementRequirement.OverlapCollider( new ContactFilter2D().NoFilter(), placementColliders );
@@ -406,7 +395,7 @@ public class PlayerController : EventReceiverInstance
                         rootType.placementRequirement.GetContacts( contacts );
 
                         if( contacts.All( c => tileMap.GetInstantiatedObject( tileMap.WorldToCell( c.point ) ).
-                            CompareTag( rootType.placementTagRequirement ) ) )
+                            CompareTag( rootType.type.placementTagRequirement ) ) )
                         {
                             foundRequiredPlacement = true;
                         }
@@ -448,10 +437,7 @@ public class PlayerController : EventReceiverInstance
         bool validPlacement = validCollision && validAngle;
 
         // Colour tint
-        if( newRoot.sprite != null )
-            newRoot.sprite.color = validPlacement ? newRoot.baseCol : invalidPlacementColour;
-        if( newRoot.mesh != null )
-            newRoot.mesh.material.SetColor( "_Colour", validPlacement ? newRoot.baseCol : invalidPlacementColour );
+        newRoot.rootObject.HighlightValidPlacement( validPlacement );
 
         // Place
         if( validPlacement && Input.GetMouseButtonDown( 0 ) )
@@ -461,7 +447,7 @@ public class PlayerController : EventReceiverInstance
         // Cancel
         else if( Input.GetMouseButtonDown( 1 ) )
         {
-            var numNewConnections = newRoot.rootType.GetComponentsInChildren<RootConnection>( true ).Length;
+            var numNewConnections = newRoot.rootObject.GetComponentsInChildren<RootConnection>( true ).Length;
             var allConnections = newRoot.obj.GetComponentsInChildren<RootConnection>( true );
             for( int i = 0; i < numNewConnections; ++i )
             {
@@ -497,8 +483,8 @@ public class PlayerController : EventReceiverInstance
 
     private void ConfirmNewRoot()
     {
-        var rootType = newRoot.rootType;
-        currentResource -= rootType.cost;
+        var rootType = newRoot.rootObject;
+        currentResource -= rootType.type.cost;
 
         UpdateBars();
 
@@ -561,7 +547,8 @@ public class PlayerController : EventReceiverInstance
         texts[0].text = string.Format( "Next Tree Age: {0}\nCost: ", level + 2 );
         texts[1].text = GetLevelUpCost().food.ToString();
         texts[2].text = GetLevelUpCost().water.ToString();
-        levelUpUI.GetComponentInChildren<Image>().color = CanLevelUp() ? levelUpUIColour : invalidPlacementColour;
+        var invalidColour = GameController.Instance.Constants.invalidPlacementColour;
+        levelUpUI.GetComponentInChildren<Image>().color = CanLevelUp() ? levelUpUIColour : invalidColour;
     }
 
     private bool CanLevelUp()
@@ -592,13 +579,16 @@ public class PlayerController : EventReceiverInstance
 
         rootSelectionUIContent.transform.DetachChildren();
 
-        foreach( var type in gameConstants.rootTypes )
+        foreach( var type in GameController.Instance.Constants.rootTypes )
         {
-            if( level < type.requiredLevel )
+            if( level < type.type.requiredLevel )
+                continue;
+            // Root connections can only place the base root
+            if( currentConnection != null && currentConnection.parent.depth == 0 && type.type.requiredLevel != -1 )
                 continue;
 
             var entry = Instantiate( rootEntryUIPrefab.gameObject, rootSelectionUIContent.transform );
-            entry.GetComponent<RootEntryUI>().SetData( type );
+            entry.GetComponent<RootEntryUI>().SetData( type.type );
             var typeLocal = type;
             entry.GetComponent<Button>().onClick.AddListener( () =>
             {
@@ -609,6 +599,6 @@ public class PlayerController : EventReceiverInstance
 
     public Resource GetLevelUpCost()
     {
-        return gameConstants.levelCosts[level];
+        return GameController.Instance.Constants.levelCosts[level];
     }
 }

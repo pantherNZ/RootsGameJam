@@ -8,9 +8,9 @@ public class RootEntryUI : MonoBehaviour
     [SerializeField] Image image;
     [SerializeField] TMPro.TextMeshProUGUI costWaterText;
     [SerializeField] TMPro.TextMeshProUGUI costFoodText;
-    private BaseRoot info;
+    private RootData info;
 
-    public void SetData( BaseRoot info )
+    public void SetData( RootData info )
     {
         nameText.text = info.rootName;
         descText.text = info.description;

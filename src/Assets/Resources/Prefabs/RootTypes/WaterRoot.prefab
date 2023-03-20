@@ -146,27 +146,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c388287747e9fd04f8f694358dfc91b2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  rootName: Water Root
-  description: Gathers 25 Water per second, must be placed in water
-  cost:
-    food: 150
-    water: 50
-    energy: 0
-  icon: {fileID: 2800000, guid: 13e04c38abb13064faf0dda4182cbe10, type: 3}
-  isPlaced: 0
-  requiredLevel: 2
-  placementTagRequirement: Water
+  type: {fileID: 11400000, guid: abb40e13eaa9bb04fa101560df833866, type: 2}
   placementRequirement: {fileID: 4400907349191002859}
-  gatherTimeSec: 0.2
-  consume:
-    food: 0
-    water: 0
-    energy: 0
-  gain:
-    food: 0
-    water: 5
-    energy: 0
-  showGainToastUI: 0
+  isPlaced: 0
+  sprites: []
 --- !u!1 &5874525479893708746
 GameObject:
   m_ObjectHideFlags: 0

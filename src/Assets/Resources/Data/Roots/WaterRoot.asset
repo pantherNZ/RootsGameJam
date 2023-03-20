@@ -1,0 +1,39 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8c75d009e45fe1e4f8f8c2069cf208c6, type: 3}
+  m_Name: WaterRoot
+  m_EditorClassIdentifier: 
+  rootName: Water Root
+  description: Gathers 25 Water per second, must be placed in water
+  cost:
+    food: 150
+    water: 50
+    energy: 0
+  icon: {fileID: 0}
+  requiredLevel: 2
+  placementTagRequirement: Water
+  lengthMin: 2
+  lengthMax: 5
+  gatherTimeSec: 0.2
+  consume:
+    food: 0
+    water: 0
+    energy: 0
+  gain:
+    food: 0
+    water: 5
+    energy: 0
+  showGainToastUI: 0
+  storage:
+    food: 0
+    water: 0
+    energy: 0

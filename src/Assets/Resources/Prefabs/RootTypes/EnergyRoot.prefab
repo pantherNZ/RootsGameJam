@@ -45,25 +45,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c388287747e9fd04f8f694358dfc91b2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  rootName: Energy Root
-  description: Converts 50 Water and Nutrients per second into 5 Energy
-  cost:
-    food: 60
-    water: 60
-    energy: 0
-  icon: {fileID: 2800000, guid: 13e04c38abb13064faf0dda4182cbe10, type: 3}
+  type: {fileID: 11400000, guid: c6d2db66dacf3ef4a8d3079f7412aaee, type: 2}
+  placementRequirement: {fileID: 0}
   isPlaced: 0
-  requiredLevel: 1
-  gatherTimeSec: 3
-  consume:
-    food: 150
-    water: 150
-    energy: 0
-  gain:
-    food: 0
-    water: 0
-    energy: 5
-  showGainToastUI: 1
+  sprites: []
 --- !u!1 &5874525479893708746
 GameObject:
   m_ObjectHideFlags: 0

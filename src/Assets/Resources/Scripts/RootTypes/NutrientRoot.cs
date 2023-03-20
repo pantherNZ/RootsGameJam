@@ -2,14 +2,14 @@
 
 public class NutrientRoot : BaseRoot
 {
-    [SerializeField] float gatherTimeSec = 1.0f;
-    [SerializeField] Resource consume;
-    [SerializeField] Resource gain;
-    [SerializeField] bool showGainToastUI;
+    private Vector3 center;
 
     public override void OnPlacement()
     {
-        Utility.FunctionTimer.CreateTimer( gatherTimeSec, GainResources, "RootNutrient" + gameObject.GetInstanceID(), true );
+        base.OnPlacement();
+
+        center = transform.GetComponentInChildren<Renderer>().bounds.center;
+        Utility.FunctionTimer.CreateTimer( type.gatherTimeSec, GainResources, "RootNutrient" + gameObject.GetInstanceID(), true );
     }
 
     private void OnDisable()
@@ -21,8 +21,8 @@ public class NutrientRoot : BaseRoot
     {
         EventSystem.Instance.TriggerEvent( new GainResourcesEvent()
         {
-            res = gain - consume,
-            originForUIDisplay = showGainToastUI ? transform.GetComponentInChildren<Renderer>().bounds.center : null
+            res = type.gain - type.consume,
+            originForUIDisplay = type.showGainToastUI ? center : null
         } );
     }
 }

@@ -51,4 +51,5 @@ public class GameConstants : ScriptableObject
     public float menuSlerpSpeed;
     public float maxPlaceYValue;
     public TreeStats treeInitialStats;
+    public Color invalidPlacementColour = Color.red;
 }

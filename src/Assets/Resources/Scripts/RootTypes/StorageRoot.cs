@@ -2,12 +2,13 @@
 
 public class StorageRoot : BaseRoot
 {
-    [SerializeField] Resource storage;
     public override void OnPlacement()
     {
+        base.OnPlacement();
+
         EventSystem.Instance.TriggerEvent( new ModifyStorageEvent()
         {
-            res = storage,
+            res = type.storage,
         } );
     }
 
@@ -15,7 +16,7 @@ public class StorageRoot : BaseRoot
     {
         EventSystem.Instance.TriggerEvent( new ModifyStorageEvent()
         {
-            res = -storage,
+            res = -type.storage,
         } );
     }
 }

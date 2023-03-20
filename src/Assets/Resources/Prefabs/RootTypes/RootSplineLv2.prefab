@@ -111,10 +111,8 @@ PolygonCollider2D:
   m_AutoTiling: 0
   m_Points:
     m_Paths:
-    - - {x: 0, y: 0.3}
-      - {x: 1, y: 0.3}
-      - {x: 1, y: -0.3}
-      - {x: 0, y: -0.3}
+    - - {x: 0.5, y: 0.3}
+      - {x: 0.5, y: -0.3}
 --- !u!1 &5642851221771736849
 GameObject:
   m_ObjectHideFlags: 0
@@ -184,7 +182,7 @@ MonoBehaviour:
       - 0
       globalNormalsAngle: 0
       flipNormals: 0
-    vertexPathUpToDate: 0
+    vertexPathUpToDate: 1
     vertexPathMaxAngleError: 0.3
     vertexPathMinVertexSpacing: 0
     showTransformTool: 1
@@ -241,19 +239,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0227c379e559a7b4b9885637ce23336a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  rootName: Core Root
-  description: Root which has multiple points to root off from
-  cost:
-    food: 80
-    water: 80
-    energy: 10
-  icon: {fileID: 2800000, guid: 0c8b153d0b445e74c9d461a099666ab1, type: 3}
-  isPlaced: 0
-  requiredLevel: 1
-  placementTagRequirement: 
+  type: {fileID: 11400000, guid: f423a529316e9204585b5c30dc4a5cc5, type: 2}
   placementRequirement: {fileID: 0}
-  lengthMin: 2
-  lengthMax: 5
+  isPlaced: 0
+  sprites: []
 --- !u!1001 &4828110722528428731
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -296,6 +285,10 @@ PrefabInstance:
     - target: {fileID: 1711878016247184825, guid: b25eaeb96a74dfe4fa9cdbcd068d00df, type: 3}
       propertyPath: m_LocalEulerAnglesHint.y
       value: 90
+      objectReference: {fileID: 0}
+    - target: {fileID: 1737996800529509711, guid: b25eaeb96a74dfe4fa9cdbcd068d00df, type: 3}
+      propertyPath: distFromEnd
+      value: 0.2
       objectReference: {fileID: 0}
     - target: {fileID: 1737996800529509711, guid: b25eaeb96a74dfe4fa9cdbcd068d00df, type: 3}
       propertyPath: autoUpdatePos
@@ -343,7 +336,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6502692289256205315, guid: b25eaeb96a74dfe4fa9cdbcd068d00df, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 1
+      value: 0.8
       objectReference: {fileID: 0}
     - target: {fileID: 6502692289256205315, guid: b25eaeb96a74dfe4fa9cdbcd068d00df, type: 3}
       propertyPath: m_LocalPosition.y
@@ -355,11 +348,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6502692289256205315, guid: b25eaeb96a74dfe4fa9cdbcd068d00df, type: 3}
       propertyPath: m_LocalRotation.w
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 6502692289256205315, guid: b25eaeb96a74dfe4fa9cdbcd068d00df, type: 3}
       propertyPath: m_LocalRotation.x
-      value: -0
+      value: 0.7071068
       objectReference: {fileID: 0}
     - target: {fileID: 6502692289256205315, guid: b25eaeb96a74dfe4fa9cdbcd068d00df, type: 3}
       propertyPath: m_LocalRotation.y
@@ -367,7 +360,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6502692289256205315, guid: b25eaeb96a74dfe4fa9cdbcd068d00df, type: 3}
       propertyPath: m_LocalRotation.z
-      value: -0
+      value: 0.7071068
       objectReference: {fileID: 0}
     - target: {fileID: 6502692289256205315, guid: b25eaeb96a74dfe4fa9cdbcd068d00df, type: 3}
       propertyPath: m_LocalEulerAnglesHint.x
@@ -506,11 +499,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6502692289256205315, guid: b25eaeb96a74dfe4fa9cdbcd068d00df, type: 3}
       propertyPath: m_LocalRotation.w
-      value: 1
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 6502692289256205315, guid: b25eaeb96a74dfe4fa9cdbcd068d00df, type: 3}
       propertyPath: m_LocalRotation.x
-      value: -0
+      value: 0.7071068
       objectReference: {fileID: 0}
     - target: {fileID: 6502692289256205315, guid: b25eaeb96a74dfe4fa9cdbcd068d00df, type: 3}
       propertyPath: m_LocalRotation.y
@@ -518,7 +511,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6502692289256205315, guid: b25eaeb96a74dfe4fa9cdbcd068d00df, type: 3}
       propertyPath: m_LocalRotation.z
-      value: -0
+      value: 0.7071068
       objectReference: {fileID: 0}
     - target: {fileID: 6502692289256205315, guid: b25eaeb96a74dfe4fa9cdbcd068d00df, type: 3}
       propertyPath: m_LocalEulerAnglesHint.x

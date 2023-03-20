@@ -25,7 +25,6 @@ public struct TreeStats
 public class Tree : MonoBehaviour, IDamageable
 {
     [SerializeField] float spinSpeed;
-    [SerializeField] GameConstants constants;
     [SerializeField] GameObject treeLevelUpObj;
     [SerializeField] Color treeHighlightColour;
     [SerializeField] PlayerController controller;
@@ -37,7 +36,7 @@ public class Tree : MonoBehaviour, IDamageable
 
     private void Start()
     {
-        stats = constants.treeInitialStats;
+        stats = GameController.Instance.Constants.treeInitialStats;
         var sprite = treeLevelUpObj.GetComponent<SpriteRenderer>();
         baseColour = sprite.color;
 

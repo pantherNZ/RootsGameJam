@@ -1,12 +1,3 @@
-// Upgrade NOTE: replaced 'mul(UNITY_MATRIX_MVP,*)' with 'UnityObjectToClipPos(*)'
-
-// Unity built-in shader source. Copyright (c) 2016 Unity Technologies. MIT license (see license.txt)
-
-// Unlit alpha-blended shader.
-// - no lighting
-// - no lightmap support
-// - no per-material color
-
 Shader "TreeRootShader" {
     Properties{
         _MainTex("Base (RGB) Trans (A)", 2D) = "white" {}
