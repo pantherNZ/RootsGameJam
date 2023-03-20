@@ -101,49 +101,70 @@ public class PlayerController : EventReceiverInstance
 
     public override void OnEventReceived( IBaseEvent e )
     {
-        if( gameState != GameState.Game )
-            return;
-
-        if( e is GainResourcesEvent gain )
+        if( gameState == GameState.GameOver )
         {
-            if( ( maxResource + gain.res ).IsValid() )
+            if( e is ResetGameEvent )
             {
-                currentResource.water = Mathf.Min( maxResource.water, currentResource.water + gain.res.water );
-                currentResource.food = Mathf.Min( maxResource.food, currentResource.food + gain.res.food );
-                currentResource.energy = Mathf.Min( maxResource.energy, currentResource.energy + gain.res.energy );
-                UpdateBars();
+                ShowMenu();
 
-                if( currentConnection != null )
+                foreach( var root in roots )
                 {
-                    foreach( Transform t in rootSelectionUIContent.transform )
+                    if( root.parent.depth == 0 && root.spline != null )
                     {
-                        t.GetComponent<RootEntryUI>().CheckEnabled( currentResource );
+                        for( int i = 4; i < root.spline.pathCreator.bezierPath.NumAnchorPoints; ++i )
+                            root.spline.pathCreator.bezierPath.DeleteSegment( i );
+                        continue;
+                    }
+
+                    root.obj.Destroy();
+                }
+
+                roots.Clear();
+            }
+        }
+        else if( gameState == GameState.Game )
+        {
+            if( e is GainResourcesEvent gain )
+            {
+                if( ( maxResource + gain.res ).IsValid() )
+                {
+                    currentResource.water = Mathf.Min( maxResource.water, currentResource.water + gain.res.water );
+                    currentResource.food = Mathf.Min( maxResource.food, currentResource.food + gain.res.food );
+                    currentResource.energy = Mathf.Min( maxResource.energy, currentResource.energy + gain.res.energy );
+                    UpdateBars();
+
+                    if( currentConnection != null )
+                    {
+                        foreach( Transform t in rootSelectionUIContent.transform )
+                        {
+                            t.GetComponent<RootEntryUI>().CheckEnabled( currentResource );
+                        }
+                    }
+
+                    if( gain.originForUIDisplay.HasValue )
+                    {
+                        var newToast = Instantiate( gainResourceUIPrefab, worldUIRoot.transform );
+                        newToast.transform.position = gain.originForUIDisplay.Value;
+
+                        this.InterpolatePosition( newToast.transform, newToast.transform.position + new Vector3( 0.0f, 1.0f, 0.0f ), 1.0f );
+                        this.FadeToBlack( newToast.GetComponent<CanvasGroup>(), 1.0f );
                     }
                 }
-
-                if( gain.originForUIDisplay.HasValue )
+            }
+            else if( e is ModifyStorageEvent modify )
+            {
+                if( ( maxResource + modify.res ).IsValid() )
                 {
-                    var newToast = Instantiate( gainResourceUIPrefab, worldUIRoot.transform );
-                    newToast.transform.position = gain.originForUIDisplay.Value;
-
-                    this.InterpolatePosition( newToast.transform, newToast.transform.position + new Vector3( 0.0f, 1.0f, 0.0f ), 1.0f );
-                    this.FadeToBlack( newToast.GetComponent<CanvasGroup>(), 1.0f );
+                    maxResource += modify.res;
+                    UpdateBars();
+                    ShowLevelUpPopup( levelUpUI.activeSelf );
                 }
             }
-        }
-        else if( e is ModifyStorageEvent modify )
-        {
-            if( ( maxResource + modify.res ).IsValid() )
+            else if( e is GameOverEvent )
             {
-                maxResource += modify.res;
-                UpdateBars();
-                ShowLevelUpPopup( levelUpUI.activeSelf );
+                gameState = GameState.GameOver;
+                UpdateScreens();
             }
-        }
-        else if( e is GameOverEvent )
-        {
-            gameState = GameState.GameOver;
-            UpdateScreens();
         }
     }
 
@@ -524,14 +545,13 @@ public class PlayerController : EventReceiverInstance
         gameUIRoot.SetActive( true );
     }
 
-    public void ShowMenu()
+    void ShowMenu()
     {
         gameState = GameState.Menu;
+        UpdateScreens();
+
         foreach( var letter in mainMenuLetters )
             letter.Show();
-
-        gameUIRoot.SetActive( false );
-        mainMenuPanel.gameObject.SetActive( true );
     }
 
     void ChangeLevel( int l )

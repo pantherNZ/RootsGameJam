@@ -12,7 +12,7 @@ public class GameOverUI : EventReceiverInstance
     {
         base.Start();
 
-        letters = GetComponentsInChildren<MainMenuLetter>().ToList();
+        letters = GetComponentsInChildren<MainMenuLetter>( true ).ToList();
     }
 
     public override void OnEventReceived( IBaseEvent e )
@@ -40,5 +40,7 @@ public class GameOverUI : EventReceiverInstance
         {
             ui.SetActive( false );
         } );
+
+        EventSystem.Instance.TriggerEvent( new ResetGameEvent() );
     }
 }

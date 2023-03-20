@@ -14,3 +14,7 @@ public class ModifyStorageEvent : IBaseEvent
 public class GameOverEvent : IBaseEvent
 {
 }
+
+public class ResetGameEvent : IBaseEvent
+{
+}

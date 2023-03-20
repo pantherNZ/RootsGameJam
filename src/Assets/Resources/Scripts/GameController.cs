@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class GameController : MonoBehaviour
+public class GameController : EventReceiverInstance
 {
     [SerializeField] WaveData waveData;
     [SerializeField] GameConstants constants;
@@ -23,8 +23,10 @@ public class GameController : MonoBehaviour
     public static GameController Instance { get; private set; }
     public GameConstants Constants { get => constants; private set { } }
 
-    private void Start()
+    protected override void Start()
     {
+        base.Start();
+
         Instance = this;
         player = FindObjectOfType<PlayerController>();
 
@@ -113,5 +115,19 @@ public class GameController : MonoBehaviour
         }
 
         yield return null;
+    }
+
+    public override void OnEventReceived( IBaseEvent e )
+    {
+        if( e is ResetGameEvent )
+        {
+            endlessMode = false;
+            dayTime = true;
+            currentTimeHours = waveData.startHour;
+
+            foreach( var monster in monsters )
+                monster.Destroy();
+            monsters.Clear();
+        }
     }
 }
