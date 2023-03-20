@@ -10,18 +10,25 @@ public class GameController : MonoBehaviour
     [SerializeField] int currentDay;
     [SerializeField] Transform spawnPosLeft;
     [SerializeField] Transform spawnPosRight;
+    [SerializeField] int monsterLayerMin = 7;
+    [SerializeField] int monsterLayerMax = 100;
 
     private bool dayTime = true;
     private bool endlessMode;
     private List<GameObject> monsters = new();
     private PlayerController player;
     private float currentTimeHours = 6.0f;
+    private List<int> validLayers = new List<int>();
 
     private void Start()
     {
         player = FindObjectOfType<PlayerController>();
 
         currentTimeHours = waveData.startHour;
+
+        validLayers.Capacity = monsterLayerMax - monsterLayerMin;
+        for( int i = monsterLayerMin; i < monsterLayerMax; ++i )
+            validLayers.Add( i );
     }
 
     private void Update()
@@ -59,6 +66,8 @@ public class GameController : MonoBehaviour
             waveData.endlessWaves[Utility.Mod( currentDay, waveData.endlessWaves.Count )] :
             waveData.waves[currentDay];
 
+        var layers = new List<int>( validLayers );
+
         for( int waveIdx = 0; waveIdx < curentDayData.monsters.Count; ++waveIdx )
         {
             Debug.Assert( !dayTime );
@@ -81,7 +90,16 @@ public class GameController : MonoBehaviour
                 var modifiers = curentDayData.modifier;
                 if( endlessMode )
                     modifiers *= waveData.endlessPerDayModifier;
-                newMonster.GetComponent<Monster>().Initialise( modifiers );
+                newMonster.GetComponent<Monster>().Initialise( next, modifiers );
+                
+                // Random layer
+                var idx = Random.Range( 0, layers.Count - 1 );
+                newMonster.GetComponent<SpriteRenderer>().sortingOrder = layers[idx];
+                layers.RemoveAt( idx );
+
+                if( layers.IsEmpty() )
+                    layers = new List<int>( validLayers );
+
                 monsters.Add( newMonster );
 
                 yield return new WaitForSeconds( next.delayPerMonsterSec );
