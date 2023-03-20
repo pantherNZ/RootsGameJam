@@ -73,7 +73,7 @@ public class Tree : MonoBehaviour, IDamageable
     public void ReceiveDamage( IDamageDealer from, int damage, DamageType type )
     {
         var oldHp = stats;
-        stats.health = Mathf.Max( 0, damage );
+        stats.health = Mathf.Max( 0, stats.health - damage );
         OnHealthChanged?.Invoke( oldHp, stats, type );
 
         if( stats.health <= 0 )
