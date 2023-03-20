@@ -11,6 +11,15 @@ public class HealthBarUI : MonoBehaviour
     private void Start()
     {
         bar.SetValue( constants.treeInitialStats.health, constants.treeInitialStats.maxHealth );
+    }
+
+    private void OnDisable()
+    {
+        tree.OnHealthChanged -= Tree_OnHealthChanged;
+    }
+
+    private void OnEnable()
+    {
         tree.OnHealthChanged += Tree_OnHealthChanged;
     }
 

@@ -67,16 +67,19 @@ public class PlayerController : EventReceiverInstance
         base.Start();
 
         mainCamera = Camera.main;
+        mainMenuLetters = mainMenuPanel.GetComponentsInChildren<MainMenuLetter>().ToList();
 
         UpdateScreens();
         ChangeLevel( 0 );
+
+        if( gameState == GameState.Menu )
+            ShowMenu();
 
         currentResource = gameConstants.startingResource;
         maxResource = gameConstants.startingMaxResource;
 
         // Find root connections and listen to their click event
         var rootConnections = FindObjectsOfType<RootConnection>();
-        mainMenuLetters = FindObjectsOfType<MainMenuLetter>().ToList();
 
         ListenToConnections( rootConnections );
         SetupRootTypeUIOptions();
@@ -535,7 +538,7 @@ public class PlayerController : EventReceiverInstance
         gameUIRoot.SetActive( true );
     }
 
-    void ShowMenu()
+    public void ShowMenu()
     {
         gameState = GameState.Menu;
         foreach( var letter in mainMenuLetters )

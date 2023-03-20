@@ -15,13 +15,17 @@ MonoBehaviour:
   dayLengthSec: 60
   nightStartHour: 22
   nightEndHour: 6
-  startHour: 6
+  startHour: 21
   waves:
   - delaySec: 1
     monsters:
     - monsterPrefab: {fileID: 410713729358090703, guid: 85096e8bff5794c4daa6900297902e44, type: 3}
       count: 5
-      delayPerMonsterSec: 1
+      delayPerMonsterSec: 2
+      damage: 1
+      health: 10
+      speed: 5
+      damageType: 0
     modifier:
       speedModifier: 1
       lifeModifier: 1

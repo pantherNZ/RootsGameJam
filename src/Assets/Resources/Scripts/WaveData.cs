@@ -9,6 +9,10 @@ public struct MonsterData
     public GameObject monsterPrefab;
     public int count;
     public float delayPerMonsterSec;
+    public int damage;
+    public int health;
+    public float speed;
+    public DamageType damageType;
 }
 
 [Serializable]

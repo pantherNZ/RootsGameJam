@@ -64,4 +64,4 @@ MonoBehaviour:
   dirtChunkSize: {x: 17.5, y: 10.777}
   groundHeightOffset: 0
   levelSeed: 13434
-  initGenerateChunks: 20
+  initGenerateChunks: 1

@@ -19,7 +19,6 @@ public class MainMenuLetter : MonoBehaviour
         mainCamera = Camera.main;
         startPos = transform.localPosition;
         Reset();
-        Show();
     }
 
     Vector3 GeneratePos()
@@ -40,13 +39,18 @@ public class MainMenuLetter : MonoBehaviour
         transform.localPosition = GeneratePos();
     }
 
-    public void Hide()
+    public float GenerateTime()
     {
-        this.InterpolatePosition( GeneratePos(), moveTimeBase + ( Random.value - 0.5f ) * moveTimeRand, true, true );
+        return moveTimeBase + ( Random.value - 0.5f ) * moveTimeRand;
     }
 
-    public void Show()
+    public void Hide( float? timeOverride = null )
     {
-        this.InterpolatePosition( startPos, moveTimeBase + ( Random.value - 0.5f ) * moveTimeRand, true, false );
+        this.InterpolatePosition( GeneratePos(), timeOverride ?? GenerateTime(), true, true );
+    }
+
+    public void Show( float? timeOverride = null )
+    {
+        this.InterpolatePosition( startPos, timeOverride ?? GenerateTime(), true, false );
     }
 }
