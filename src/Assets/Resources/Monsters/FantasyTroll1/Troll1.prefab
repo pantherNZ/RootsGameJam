@@ -121,7 +121,8 @@ MonoBehaviour:
   heightOffset: 2.9
   attackDistance: 2.5
   attackDistanceRand: 0.5
-  runningSpeed: 10
+  runSpeedThreshold: 5
+  moveAnimationSpeed: 3
   runAnim: Run
   walkAnim: Walk
   attackAnim: Attack
@@ -130,3 +131,9 @@ MonoBehaviour:
   attackLayer:
     serializedVersion: 2
     m_Bits: 256
+  speed: 0
+  damage: 0
+  attacking: 0
+  health: 0
+  currentAnim: 
+  attackDistanceFinal: 0

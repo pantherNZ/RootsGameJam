@@ -24,7 +24,7 @@ MonoBehaviour:
       delayPerMonsterSec: 2
       damage: 1
       health: 10
-      speed: 5
+      speed: 3
       damageType: 0
     modifier:
       speedModifier: 1

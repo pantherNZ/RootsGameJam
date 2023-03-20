@@ -7,7 +7,8 @@ public class Monster : MonoBehaviour, IDamageDealer
     [SerializeField] float heightOffset;
     [SerializeField] float attackDistance;
     [SerializeField] float attackDistanceRand;
-    [SerializeField] float runningSpeed;
+    [SerializeField] float runSpeedThreshold;
+    [SerializeField] float moveAnimationSpeed;
     [SerializeField] string runAnim;
     [SerializeField] string walkAnim;
     [SerializeField] string attackAnim;
@@ -15,13 +16,13 @@ public class Monster : MonoBehaviour, IDamageDealer
     [SerializeField] string deathAnim;
     [SerializeField] LayerMask attackLayer;
 
-    private float speed;
-    private int damage;
-    private bool attacking;
-    private int health;
+    [SerializeField] float speed;
+    [ReadOnly, SerializeField] int damage;
+    [ReadOnly, SerializeField] bool attacking;
+    [ReadOnly, SerializeField] int health;
+    [ReadOnly, SerializeField] string currentAnim;
+    [ReadOnly, SerializeField] float attackDistanceFinal;
     private Animator animator;
-    private string currentAnim;
-    private float attackDistanceFinal;
 
     private void Awake()
     {
@@ -50,37 +51,40 @@ public class Monster : MonoBehaviour, IDamageDealer
         else
         {
             var prevAnim = currentAnim;
+            var prevSpeed = animator.speed;
             PlayAnimation( takeHitAnim );
-            QueueAnimation( prevAnim );
+            QueueAnimation( prevAnim, prevSpeed );
         }
     }
 
     private void PlayMovementAnimation()
     {
-        PlayAnimation( speed >= runningSpeed ? runAnim : walkAnim );
+        float animSpeed = speed / moveAnimationSpeed;
+        PlayAnimation( speed >= runSpeedThreshold ? runAnim : walkAnim, animSpeed );
     }
 
-    private void PlayAnimation( string anim )
+    private void PlayAnimation( string anim, float speed = 1.0f )
     {
         currentAnim = anim;
         animator.Play( anim );
+        animator.speed = speed;
     }
 
-    private void QueueAnimation( string anim )
+    private void QueueAnimation( string anim, float speed = 1.0f )
     {
-        StartCoroutine( QueueAnimationInternal( anim ) );
+        StartCoroutine( QueueAnimationInternal( anim, speed ) );
     }
 
-    private IEnumerator QueueAnimationInternal( string anim )
+    private IEnumerator QueueAnimationInternal( string anim, float speed = 1.0f )
     {
-        var currentAnim = animator.GetCurrentAnimatorStateInfo( 0 ).shortNameHash;
+        var current = animator.GetCurrentAnimatorStateInfo( 0 ).shortNameHash;
 
-        while( animator.GetCurrentAnimatorStateInfo( 0 ).shortNameHash == currentAnim )
+        while( animator.GetCurrentAnimatorStateInfo( 0 ).shortNameHash == current )
         {
             yield return null;
         }
 
-        animator.Play( anim );
+        PlayAnimation( anim, speed );
     }
 
     private void Update()
