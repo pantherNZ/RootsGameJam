@@ -1,37 +1,40 @@
 using System.Collections;
+using System.Linq;
 using UnityEngine;
 
 public class Monster : MonoBehaviour, IDamageDealer
 {
     [SerializeField] float heightOffset;
     [SerializeField] float attackDistance;
+    [SerializeField] float attackDistanceRand;
     [SerializeField] float runningSpeed;
-    [SerializeField] int maxHealth;
-    [SerializeField] float speed;
-    [SerializeField] int damage;
-    [SerializeField] bool attacking;
     [SerializeField] string runAnim;
     [SerializeField] string walkAnim;
     [SerializeField] string attackAnim;
     [SerializeField] string takeHitAnim;
     [SerializeField] string deathAnim;
+    [SerializeField] LayerMask attackLayer;
 
+    private float speed;
+    private int damage;
+    private bool attacking;
     private int health;
     private Animator animator;
     private string currentAnim;
+    private float attackDistanceFinal;
 
     private void Awake()
     {
         animator = GetComponent<Animator>();
     }
 
-    public void Initialise( Modifier mod )
+    public void Initialise( MonsterData data, Modifier mod )
     {
-        speed *= mod.speedModifier;
-        maxHealth = Mathf.RoundToInt( maxHealth * mod.lifeModifier );
-        health = maxHealth;
-        damage = Mathf.RoundToInt( damage * mod.damageModifier );
+        speed = data.speed * mod.speedModifier;
+        health = Mathf.RoundToInt( data.health * mod.lifeModifier );
+        damage = Mathf.RoundToInt( data.damage * mod.damageModifier );
         transform.position += new Vector3( 0.0f, heightOffset, 0.0f );
+        attackDistanceFinal = attackDistance + Random.Range( -attackDistanceRand / 2.0f, attackDistanceRand / 2.0f );
         PlayMovementAnimation();
     }
 
@@ -83,8 +86,11 @@ public class Monster : MonoBehaviour, IDamageDealer
     private void Update()
     {
         var prevAttacking = attacking;
-        transform.position += new Vector3( -transform.position.normalized.x * speed * Time.deltaTime, 0.0f, 0.0f );
-        attacking = Mathf.Abs( transform.position.x ) <= attackDistance;
+        var direction = transform.right * -transform.position.normalized.x;
+        if( !attacking )
+            transform.position += speed * Time.deltaTime * direction;
+        var hits = Physics2D.RaycastAll( transform.position, direction, attackDistanceFinal, attackLayer );
+        attacking = hits.Any( x => x.collider.GetComponent<IDamageable>() != null );
 
         if( attacking != prevAttacking )
         {
@@ -97,7 +103,15 @@ public class Monster : MonoBehaviour, IDamageDealer
 
     public void DispatchDamage()
     {
-        DispatchDamage( null, damage, DamageType.Default );
+        var direction = transform.right * -transform.position.normalized.x;
+        var hits = Physics2D.RaycastAll( transform.position, direction, attackDistanceFinal, attackLayer );
+
+        foreach( var hit in hits )
+        {
+            var target = hit.collider.GetComponent<IDamageable>();
+            if( target != null )
+                DispatchDamage( target, damage, DamageType.Default );
+        }
     }
 
     public void DispatchDamage( IDamageable to, int damage, DamageType type )

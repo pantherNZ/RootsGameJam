@@ -119,15 +119,14 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   heightOffset: 2.9
-  attackDistance: 1.8
+  attackDistance: 2.5
+  attackDistanceRand: 0.5
   runningSpeed: 10
-  maxHealth: 100
-  speed: 5
-  damage: 50
-  attacking: 0
-  idleAnim: 
   runAnim: Run
   walkAnim: Walk
   attackAnim: Attack
   takeHitAnim: Hurt
   deathAnim: Death
+  attackLayer:
+    serializedVersion: 2
+    m_Bits: 256
