@@ -25,6 +25,6 @@ public class HealthBarUI : MonoBehaviour
 
     private void Tree_OnHealthChanged( TreeStats oldStats, TreeStats newStats, DamageType type )
     {
-        bar.SetValue( newStats.health, newStats.maxHealth );
+        bar.SetValue( newStats.health, newStats.maxHealth, type != DamageType.Cheat );
     }
 }

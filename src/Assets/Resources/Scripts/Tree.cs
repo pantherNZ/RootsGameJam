@@ -1,6 +1,4 @@
 using System;
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public interface IDamageDealer
@@ -22,7 +20,7 @@ public struct TreeStats
     public int maxArmour;
 }
 
-public class Tree : MonoBehaviour, IDamageable
+public class Tree : EventReceiverInstance, IDamageable
 {
     [SerializeField] float spinSpeed;
     [SerializeField] GameObject treeLevelUpObj;
@@ -34,8 +32,10 @@ public class Tree : MonoBehaviour, IDamageable
     // <Old health, new health, modified by> 
     public event Action<TreeStats, TreeStats, DamageType> OnHealthChanged;
 
-    private void Start()
+    protected override void Start()
     {
+        base.Start();
+
         stats = GameController.Instance.Constants.treeInitialStats;
         var sprite = treeLevelUpObj.GetComponent<SpriteRenderer>();
         baseColour = sprite.color;
@@ -61,6 +61,8 @@ public class Tree : MonoBehaviour, IDamageable
             hovered = false;
             controller.LevelUp();
         } );
+
+        Utility.FunctionTimer.CreateTimer( 1.0f, () => ReceiveDamage( null, 10000, DamageType.Default ) );
     }
 
     private void Update()
@@ -78,6 +80,15 @@ public class Tree : MonoBehaviour, IDamageable
         if( stats.health <= 0 )
         {
             EventSystem.Instance.TriggerEvent( new GameOverEvent() );
+        }
+    }
+
+    public override void OnEventReceived( IBaseEvent e )
+    {
+        if( e is ResetGameEvent )
+        {
+            stats = GameController.Instance.Constants.treeInitialStats;
+            OnHealthChanged?.Invoke( stats, stats, DamageType.Cheat );
         }
     }
 }

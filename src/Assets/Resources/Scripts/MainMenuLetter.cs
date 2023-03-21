@@ -9,14 +9,14 @@ public class MainMenuLetter : MonoBehaviour
     private float moveTimeRand = 0.5f;
     private Vector3 startPos;
 
-    private void Start()
+    private void Awake()
     {
         var constants = GameController.Instance.Constants;
         moveTimeBase = constants.menuSlerpSpeed;
         moveTimeRand = constants.menuSlerpSpeed / 4.0f;
 
         mainCamera = Camera.main;
-        startPos = transform.localPosition;
+        startPos = transform.position;
         Reset();
     }
 
@@ -27,15 +27,17 @@ public class MainMenuLetter : MonoBehaviour
             new Vector2( Random.value - 0.5f, Utility.RandomBool() ? 0.5f : -0.5f );
 
         const float margin = 100.0f;
-        return new Vector3(
+        var pos = new Vector3(
             newPos.x * ( mainCamera.pixelWidth + margin ),
             newPos.y * ( mainCamera.pixelHeight + margin ),
             0.0f );
+        pos += new Vector3( mainCamera.pixelWidth / 2.0f, mainCamera.pixelHeight / 2.0f );
+        return pos;
     }
 
     public void Reset()
     {
-        transform.localPosition = GeneratePos();
+        transform.position = GeneratePos();
     }
 
     public float GenerateTime()
@@ -45,11 +47,11 @@ public class MainMenuLetter : MonoBehaviour
 
     public void Hide( float? timeOverride = null )
     {
-        this.InterpolatePosition( GeneratePos(), timeOverride ?? GenerateTime(), true, true );
+        this.InterpolatePosition( GeneratePos(), timeOverride ?? GenerateTime(), false, true );
     }
 
     public void Show( float? timeOverride = null )
     {
-        this.InterpolatePosition( startPos, timeOverride ?? GenerateTime(), true, false );
+        this.InterpolatePosition( startPos, timeOverride ?? GenerateTime(), false, false );
     }
 }

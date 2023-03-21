@@ -5,7 +5,7 @@ using UnityEngine;
 
 public class GameOverUI : EventReceiverInstance
 {
-    [SerializeField] GameObject ui;
+    [SerializeField] CanvasGroup ui;
     private List<MainMenuLetter> letters = new List<MainMenuLetter>();
 
     protected override void Start()
@@ -19,7 +19,8 @@ public class GameOverUI : EventReceiverInstance
     {
         if( e is GameOverEvent )
         {
-            ui.SetActive( true );
+            ui.SetVisibility( true );
+            ui.gameObject.SetActive( true );
 
             foreach( var letter in letters )
                 letter.Show();
@@ -28,17 +29,16 @@ public class GameOverUI : EventReceiverInstance
 
     public void Hide()
     {
-        float maxTime = 0.0f;
-        foreach( var letter in letters )
-        {
-            float time = letter.GenerateTime();
-            maxTime = Mathf.Max( time, maxTime );
-            letter.Hide( time );
-        }
+        var duration = GameController.Instance.Constants.menuFadeOutTime;
 
-        Utility.FunctionTimer.CreateTimer( maxTime, () =>
+        foreach( var letter in letters )
+            letter.Hide();
+
+        StartCoroutine( Utility.FadeToBlack( ui, duration ) );
+
+        Utility.FunctionTimer.CreateTimer( duration, () =>
         {
-            ui.SetActive( false );
+            ui.gameObject.SetActive( false );
         } );
 
         EventSystem.Instance.TriggerEvent( new ResetGameEvent() );

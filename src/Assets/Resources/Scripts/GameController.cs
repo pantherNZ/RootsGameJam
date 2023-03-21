@@ -23,6 +23,11 @@ public class GameController : EventReceiverInstance
     public static GameController Instance { get; private set; }
     public GameConstants Constants { get => constants; private set { } }
 
+    private void Awake()
+    {
+        Instance = this;
+    }
+
     protected override void Start()
     {
         base.Start();
@@ -124,6 +129,7 @@ public class GameController : EventReceiverInstance
             endlessMode = false;
             dayTime = true;
             currentTimeHours = waveData.startHour;
+            currentDay = 0;
 
             foreach( var monster in monsters )
                 monster.Destroy();

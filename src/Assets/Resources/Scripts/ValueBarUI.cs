@@ -9,16 +9,26 @@ public class ValueBarUI : MonoBehaviour
     [SerializeField] float lerpTimeSec;
     private float? currentLerp;
     private Coroutine lerpCoroutine;
+    private bool lerpWithGain;
 
-    public void SetValue( float newValue, float max )
+    public void SetValue( float newValue, float max, bool lerp = true )
     {
         if( lerpCoroutine != null )
             StopCoroutine( lerpCoroutine );
 
-        if( !currentLerp.HasValue || newValue < currentLerp.Value )
+        if( !currentLerp.HasValue )
+            lerpWithGain = newValue < max;
+
+        if( !lerp || !currentLerp.HasValue ||
+            ( lerpWithGain && newValue < currentLerp.Value ) ||
+            ( !lerpWithGain && newValue > currentLerp.Value ) )
+        {
             SetValueInternal( newValue, max );
+        }
         else
+        {
             lerpCoroutine = StartCoroutine( LerpToNewValue( newValue, max ) );
+        }
     }
 
     IEnumerator LerpToNewValue( float newValue, float max )

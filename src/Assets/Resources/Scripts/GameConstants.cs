@@ -38,6 +38,7 @@ public enum DamageType
     Default,
     Posion,
     IgnoreArmour,
+    Cheat,
 }
 
 [Serializable]
@@ -49,6 +50,7 @@ public class GameConstants : ScriptableObject
     public Resource startingMaxResource;
     public List<BaseRoot> rootTypes;
     public float menuSlerpSpeed;
+    public float menuFadeOutTime;
     public float maxPlaceYValue;
     public TreeStats treeInitialStats;
     public Color invalidPlacementColour = Color.red;

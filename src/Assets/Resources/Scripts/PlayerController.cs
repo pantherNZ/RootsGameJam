@@ -44,7 +44,6 @@ public class PlayerController : EventReceiverInstance
     [SerializeField] GameObject levelUpUI;
     [SerializeField] TMPro.TextMeshProUGUI levelUI;
     [SerializeField] GameObject gainResourceUIPrefab;
-    [SerializeField] float menuFadeOutTime = 1.0f;
     [SerializeField] LayerMask allowPlacementLayer;
     [SerializeField] GameObject gameOverScreen;
     [SerializeField] Tilemap tileMap;
@@ -65,24 +64,11 @@ public class PlayerController : EventReceiverInstance
         mainCamera = Camera.main;
         mainMenuLetters = mainMenuPanel.GetComponentsInChildren<MainMenuLetter>().ToList();
 
-        UpdateScreens();
-        ChangeLevel( 0 );
-
-        if( gameState == GameState.Menu )
-            ShowMenu();
-
-        currentResource = GameController.Instance.Constants.startingResource;
-        maxResource = GameController.Instance.Constants.startingMaxResource;
-
-        // Find root connections and listen to their click event
-        var rootConnections = FindObjectsOfType<RootConnection>();
-
-        ListenToConnections( rootConnections );
-
-        UpdateBars();
-
-        levelUpUIColour = levelUpUI.GetComponentInChildren<Image>().color;
-        ShowLevelUpPopup( false );
+#if UNITY_EDITOR
+        Reset( gameState == GameState.Menu );
+#else
+        Reset();
+#endif
 
         // Hook up initial parent / link between connections and starting splines
         var splines = FindObjectsOfType<RootMeshCreator>();
@@ -98,6 +84,25 @@ public class PlayerController : EventReceiverInstance
         }
     }
 
+    private void Reset( bool showMenu = true )
+    {
+        currentResource = GameController.Instance.Constants.startingResource;
+        maxResource = GameController.Instance.Constants.startingMaxResource;
+
+        ChangeLevel( 0 );
+
+        if( showMenu )
+            ShowMenu();
+
+        // Find root connections and listen to their click event
+        var rootConnections = FindObjectsOfType<RootConnection>();
+        ListenToConnections( rootConnections );
+
+        UpdateBars( false );
+
+        levelUpUIColour = levelUpUI.GetComponentInChildren<Image>().color;
+        ShowLevelUpPopup( false );
+    }
 
     public override void OnEventReceived( IBaseEvent e )
     {
@@ -105,8 +110,6 @@ public class PlayerController : EventReceiverInstance
         {
             if( e is ResetGameEvent )
             {
-                ShowMenu();
-
                 foreach( var root in roots )
                 {
                     if( root.parent.depth == 0 && root.spline != null )
@@ -120,6 +123,8 @@ public class PlayerController : EventReceiverInstance
                 }
 
                 roots.Clear();
+
+                Reset();
             }
         }
         else if( gameState == GameState.Game )
@@ -168,11 +173,11 @@ public class PlayerController : EventReceiverInstance
         }
     }
 
-    void UpdateBars()
+    void UpdateBars( bool useLerp = true )
     {
-        waterBarUI.SetValue( currentResource.water, maxResource.water );
-        foodBarUI.SetValue( currentResource.food, maxResource.food );
-        energyBarUI.SetValue( currentResource.energy, maxResource.energy );
+        waterBarUI.SetValue( currentResource.water, maxResource.water, useLerp );
+        foodBarUI.SetValue( currentResource.food, maxResource.food, useLerp );
+        energyBarUI.SetValue( currentResource.energy, maxResource.energy, useLerp );
     }
 
     void Update()
@@ -211,7 +216,9 @@ public class PlayerController : EventReceiverInstance
         foreach( var connection in connections )
         {
             var connectionLocal = connection;
-            connection.GetComponent<EventDispatcherV2>().OnPointerDownEvent.AddListener( x =>
+            var eventDispatcher = connection.GetComponent<EventDispatcherV2>();
+            eventDispatcher.OnPointerDownEvent.RemoveAllListeners();
+            eventDispatcher.OnPointerDownEvent.AddListener( x =>
             {
                 ConnectionClicked( connectionLocal );
             } );
@@ -537,7 +544,7 @@ public class PlayerController : EventReceiverInstance
     void HideMenu()
     {
         gameState = GameState.Game;
-        StartCoroutine( Utility.FadeToBlack( mainMenuPanel, menuFadeOutTime ) );
+        StartCoroutine( Utility.FadeToBlack( mainMenuPanel, GameController.Instance.Constants.menuFadeOutTime ) );
 
         foreach( var letter in mainMenuLetters )
             letter.Hide();
@@ -547,6 +554,7 @@ public class PlayerController : EventReceiverInstance
 
     void ShowMenu()
     {
+        mainMenuPanel.SetVisibility( true );
         gameState = GameState.Menu;
         UpdateScreens();
 
