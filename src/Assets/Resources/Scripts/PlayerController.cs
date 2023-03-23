@@ -45,7 +45,6 @@ public class PlayerController : EventReceiverInstance
     [SerializeField] TMPro.TextMeshProUGUI levelUI;
     [SerializeField] GameObject gainResourceUIPrefab;
     [SerializeField] LayerMask allowPlacementLayer;
-    [SerializeField] GameObject gameOverScreen;
     [SerializeField] Tilemap tileMap;
     public GameState gameState = GameState.Menu;
 

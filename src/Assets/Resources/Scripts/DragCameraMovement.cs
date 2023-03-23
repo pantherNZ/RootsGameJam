@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public class DragCameraMovement : MonoBehaviour
+public class DragCameraMovement : EventReceiverInstance
 {
     [SerializeField] PlayerController controller;
     [SerializeField] RectTransform aboveGroundBounds;
@@ -10,10 +10,20 @@ public class DragCameraMovement : MonoBehaviour
     private Camera mainCam;
     private Rect cameraLimRect;
 
-    private void Start()
+    public override void OnEventReceived( IBaseEvent e )
     {
-        mainCam = Camera.main;
+        if( e is ResetGameEvent )
+        {
+            controller.transform.position = startingPos;
+            dragOrigin = null;
+        }
+    }
 
+    protected override void Start()
+    {
+        base.Start();
+
+        mainCam = Camera.main;
         cameraLimRect = aboveGroundBounds.GetWorldRect();
     }
 

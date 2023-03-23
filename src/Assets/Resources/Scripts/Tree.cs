@@ -62,7 +62,7 @@ public class Tree : EventReceiverInstance, IDamageable
             controller.LevelUp();
         } );
 
-        Utility.FunctionTimer.CreateTimer( 1.0f, () => ReceiveDamage( null, 10000, DamageType.Default ) );
+        //Utility.FunctionTimer.CreateTimer( 1.0f, () => ReceiveDamage( null, 10000, DamageType.Default ) );
     }
 
     private void Update()
