@@ -32,6 +32,8 @@ public class PlayerController : EventReceiverInstance
     [SerializeField] Resource currentResource;
     [SerializeField] Resource maxResource;
     int level;
+    public int Level => level;
+    public Resource CurrentResource => currentResource;
     [SerializeField] GameObject rootSelectionUI;
     [SerializeField] GameObject gameUIRoot;
     [SerializeField] GameObject worldUIRoot;

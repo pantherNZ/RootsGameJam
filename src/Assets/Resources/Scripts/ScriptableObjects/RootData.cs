@@ -5,13 +5,8 @@ using UnityEngine;
 
 [Serializable]
 [CreateAssetMenu( fileName = "RootData", menuName = "ScriptableObjs/RootData" )]
-public class RootData : ScriptableObject
+public class RootData : BaseObjectData
 {
-    public string rootName;
-    public string description;
-    public Resource cost;
-    public Texture2D icon;
-    public int requiredLevel;
     public string placementTagRequirement;
     public float lengthMin;
     public float lengthMax;

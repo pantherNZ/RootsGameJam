@@ -16,10 +16,10 @@ public class GameController : EventReceiverInstance
     private bool dayTime = true;
     private bool endlessMode;
     private List<GameObject> monsters = new();
-    private PlayerController player;
     private float currentTimeHours = 6.0f;
     private List<int> validLayers = new List<int>();
 
+    [HideInInspector] public PlayerController player;
     public static GameController Instance { get; private set; }
     public GameConstants Constants { get => constants; private set { } }
 

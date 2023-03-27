@@ -74,6 +74,8 @@ MonoBehaviour:
   - {fileID: 304646283082999509, guid: 2ca515e408df2064fb1bc753c25015aa, type: 3}
   - {fileID: 9092125598873235104, guid: 78d2d5e7218e5f0448deec56d97d9d36, type: 3}
   - {fileID: 9092125598873235104, guid: 5c083c2b7065b5a49a0bc76853dce403, type: 3}
+  defenceTypes:
+  - {fileID: -3436060277315482359, guid: b12ccbcac9f74d34493236cc030d1d4a, type: 3}
   menuSlerpSpeed: 0.5
   menuFadeOutTime: 2
   maxPlaceYValue: -2

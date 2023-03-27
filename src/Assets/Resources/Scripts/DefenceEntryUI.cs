@@ -1,16 +1,16 @@
 using UnityEngine;
 using UnityEngine.UI;
 
-public class RootEntryUI : MonoBehaviour
+public class DefenceEntryUI : MonoBehaviour
 {
     [SerializeField] TMPro.TextMeshProUGUI nameText;
     [SerializeField] TMPro.TextMeshProUGUI descText;
     [SerializeField] Image image;
     [SerializeField] TMPro.TextMeshProUGUI costWaterText;
     [SerializeField] TMPro.TextMeshProUGUI costFoodText;
-    private RootData info;
+    private DefenceData info;
 
-    public void SetData( RootData info )
+    public void SetData( DefenceData info )
     {
         nameText.text = info.objName;
         descText.text = info.description;
