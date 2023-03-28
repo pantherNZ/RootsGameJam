@@ -8,8 +8,10 @@ public class LevelGenerator : MonoBehaviour
 {
     [SerializeField] Tilemap tileMap;
     [SerializeField] LevelData data;
+    [SerializeField] List<Pair<Vector2Int, GameObject>> initialChunksList = new List<Pair<Vector2Int, GameObject>>();
 
     private Camera mainCamera;
+    private Dictionary<Vector2Int, GameObject> initialChunks = new Dictionary<Vector2Int, GameObject>();
     private Dictionary<Vector2Int, GameObject> chunks = new Dictionary<Vector2Int, GameObject>();
     private float groundHeight;
     private Tree tree;
@@ -31,6 +33,9 @@ public class LevelGenerator : MonoBehaviour
                 TryConstructTile( new Vector2Int( x, y ) );
             }
         }
+
+        foreach( var (chunk, obj) in initialChunksList )
+            initialChunks.Add( chunk, obj );
     }
 
     private void Update()
@@ -71,16 +76,25 @@ public class LevelGenerator : MonoBehaviour
 
     private void TryConstructTile( Vector2Int chunk )
     {
-        if( chunk.y > 0 || chunks.ContainsKey( chunk ) || ( chunk.x == 0 && chunk.y == 0 ) )
+        if( chunk.y > 0 || chunks.ContainsKey( chunk ) )
             return;
 
-        var newChunkPos = new Vector3( chunk.x * data.dirtChunkSize.x, groundHeight + chunk.y * data.dirtChunkSize.y, 0.0f );
-        var newChunk = Instantiate( data.dirtChunkPrefab, newChunkPos, Quaternion.identity );
-        chunks.Add( chunk, newChunk );
+        GameObject newChunk;
+
+        if( initialChunks.TryGetValue( chunk, out var obj ) )
+        {
+            newChunk = obj;
+        }
+        else
+        {
+            var newChunkPos = new Vector3( chunk.x * data.dirtChunkSize.x, groundHeight + chunk.y * data.dirtChunkSize.y, 0.0f );
+            newChunk = Instantiate( data.dirtChunkPrefab, newChunkPos, Quaternion.identity );
+            chunks.Add( chunk, newChunk );
+
+            ConstructGrass( chunk, newChunk );
+        }
 
         ConstructEnvObjects( chunk, newChunk );
-
-        ConstructGrass( chunk, newChunk );
     }
 
     private void ConstructEnvObjects( Vector2Int chunk, GameObject newChunk )
