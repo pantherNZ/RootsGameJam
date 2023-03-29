@@ -119,7 +119,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   heightOffset: 2.9
-  attackDistance: 2.5
+  attackDistance: 3
   attackDistanceRand: 0.5
   runSpeedThreshold: 5
   moveAnimationSpeed: 3

@@ -21,7 +21,7 @@ MonoBehaviour:
     monsters:
     - monsterPrefab: {fileID: 410713729358090703, guid: 85096e8bff5794c4daa6900297902e44, type: 3}
       count: 5
-      delayPerMonsterSec: 2
+      delayPerMonsterSec: 5
       damage: 1
       health: 10
       speed: 3

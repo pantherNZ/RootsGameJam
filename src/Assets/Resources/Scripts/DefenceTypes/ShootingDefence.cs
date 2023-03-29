@@ -30,7 +30,7 @@ public class ShootingDefence : BaseDefence
             var newProj = Instantiate( projectilePrefab );
             newProj.transform.position = projectileSpawnPos.position;
             newProj.transform.right = projectileSpawnPos.right;
-            newProj.GetComponent<Rigidbody2D>().AddForce( projectileSpawnPos.right * type.projectileSpeed, ForceMode2D.Impulse );
+            newProj.GetComponent<Rigidbody2D>().AddForce( projectileSpawnPos.up * type.projectileSpeed, ForceMode2D.Impulse );
         }
 
         cooldown = type.attackTimeSec;
