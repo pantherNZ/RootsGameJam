@@ -1,10 +1,15 @@
 ﻿using UnityEngine;
 
-public class ShootingDefence : BaseDefence
+public class ShootingDefence : BaseDefence, IDamageDealer
 {
     [SerializeField] GameObject projectilePrefab;
     [SerializeField] Transform projectileSpawnPos;
     float cooldown;
+
+    private void Start()
+    {
+        cooldown = type.attackTimeSec;
+    }
 
     private void Update()
     {
@@ -31,8 +36,27 @@ public class ShootingDefence : BaseDefence
             newProj.transform.position = projectileSpawnPos.position;
             newProj.transform.right = projectileSpawnPos.right;
             newProj.GetComponent<Rigidbody2D>().AddForce( projectileSpawnPos.up * type.projectileSpeed, ForceMode2D.Impulse );
+            newProj.GetComponent<Projectile>().onCollision += Projectile_onCollision;
         }
 
         cooldown = type.attackTimeSec;
+    }
+
+    private void Projectile_onCollision( Collider2D obj )
+    {
+        if( obj == null )
+            return;
+
+        if( obj.GetComponent<Monster>() == null )
+            return;
+
+        var damageable = obj.GetComponent<IDamageable>();
+        if( damageable != null )
+            DispatchDamage( damageable, type.damage, type.damageType );
+    }
+
+    public void DispatchDamage( IDamageable to, int damage, DamageType type )
+    {
+        to.ReceiveDamage( this, damage, type );
     }
 }

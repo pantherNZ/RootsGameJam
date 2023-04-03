@@ -13,6 +13,7 @@ public struct MonsterData
     public int health;
     public float speed;
     public DamageType damageType;
+    public Resource gainOnKill;
 }
 
 [Serializable]

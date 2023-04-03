@@ -22,5 +22,6 @@ MonoBehaviour:
   requiredLevel: 0
   attackTimeSec: 1
   damage: 10
+  damageType: 0
   numProjectiles: 1
-  projectileSpeed: 20
+  projectileSpeed: 15

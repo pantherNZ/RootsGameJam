@@ -1,8 +1,9 @@
 using System.Collections;
 using System.Linq;
+using System;
 using UnityEngine;
 
-public class Monster : MonoBehaviour, IDamageDealer
+public class Monster : MonoBehaviour, IDamageDealer, IDamageable
 {
     [SerializeField] float heightOffset;
     [SerializeField] float attackDistance;
@@ -22,7 +23,12 @@ public class Monster : MonoBehaviour, IDamageDealer
     [ReadOnly, SerializeField] int health;
     [ReadOnly, SerializeField] string currentAnim;
     [ReadOnly, SerializeField] float attackDistanceFinal;
+    [ReadOnly, SerializeField] Resource? gainOnKill;
     private Animator animator;
+
+    // Old health, new health, damage type
+    public event Action<int, int, DamageType> OnHealthChanged;
+    public bool IsDead => health <= 0;
 
     private void Awake()
     {
@@ -35,7 +41,8 @@ public class Monster : MonoBehaviour, IDamageDealer
         health = Mathf.RoundToInt( data.health * mod.lifeModifier );
         damage = Mathf.RoundToInt( data.damage * mod.damageModifier );
         transform.position += new Vector3( 0.0f, heightOffset, 0.0f );
-        attackDistanceFinal = attackDistance + Random.Range( -attackDistanceRand / 2.0f, attackDistanceRand / 2.0f );
+        gainOnKill = data.gainOnKill;
+        attackDistanceFinal = attackDistance + UnityEngine.Random.Range( -attackDistanceRand / 2.0f, attackDistanceRand / 2.0f );
         PlayMovementAnimation();
     }
 
@@ -89,6 +96,9 @@ public class Monster : MonoBehaviour, IDamageDealer
 
     private void Update()
     {
+        if( IsDead )
+            return;
+
         var prevAttacking = attacking;
         var direction = transform.right * -transform.position.normalized.x;
         if( !attacking )
@@ -121,5 +131,32 @@ public class Monster : MonoBehaviour, IDamageDealer
     public void DispatchDamage( IDamageable to, int damage, DamageType type )
     {
         to.ReceiveDamage( this, damage, type );
+    }
+
+    public void ReceiveDamage( IDamageDealer from, int damage, DamageType type )
+    {
+        if( IsDead )
+            return;
+
+        var oldHp = health;
+        health = Mathf.Max( 0, health - damage );
+        OnHealthChanged?.Invoke( oldHp, health, type );
+
+        if( health <= 0 )
+        {
+            PlayAnimation( "Death" );
+            Utility.FunctionTimer.CreateTimer( 2.0f, () => gameObject.Destroy() );
+            // Play particles, increment kills counter
+            if( gainOnKill != null )
+            {
+                EventSystem.Instance.TriggerEvent( new GainResourcesEvent()
+                {
+                    originForUIDisplay = transform.position,
+                    res = gainOnKill.Value,
+                } );
+            }
+
+            GetComponent<Collider2D>().enabled = false;
+        }
     }
 }

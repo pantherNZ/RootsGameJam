@@ -8,7 +8,8 @@ using UnityEngine;
 public class DefenceData : BaseObjectData
 {
     public float attackTimeSec;
-    public float damage;
+    public int damage;
+    public DamageType damageType;
     public float numProjectiles;
     public float projectileSpeed;
 }
