@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8c75d009e45fe1e4f8f8c2069cf208c6, type: 3}
   m_Name: BaseRoot
   m_EditorClassIdentifier: 
-  rootName: Simple Root
+  objName: Basic Root
   description: Simple root which allows for expansion
   cost:
     food: 20
@@ -21,6 +21,19 @@ MonoBehaviour:
   icon: {fileID: 0}
   requiredLevel: -1
   placementTagRequirement: 
-  placementRequirement: {fileID: 0}
   lengthMin: 2
   lengthMax: 5
+  gatherTimeSec: 0
+  consume:
+    food: 0
+    water: 0
+    energy: 0
+  gain:
+    food: 0
+    water: 0
+    energy: 0
+  showGainToastUI: 0
+  storage:
+    food: 0
+    water: 0
+    energy: 0

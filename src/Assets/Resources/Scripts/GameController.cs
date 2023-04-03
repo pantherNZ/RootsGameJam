@@ -1,4 +1,6 @@
-﻿using System.Collections;
+﻿using System;
+using System.Linq;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -19,6 +21,8 @@ public class GameController : EventReceiverInstance
     private float currentTimeHours = 6.0f;
     private List<int> validLayers = new List<int>();
 
+    // Number of enemies, direction
+    public event Action<int, SpawnPos> spawningStarted;
     [HideInInspector] public PlayerController player;
     public static GameController Instance { get; private set; }
     public GameConstants Constants { get => constants; private set { } }
@@ -79,6 +83,8 @@ public class GameController : EventReceiverInstance
 
         var layers = new List<int>( validLayers );
 
+        spawningStarted?.Invoke( curentDayData.monsters.Sum( ( x ) => x.count ), curentDayData.spawnSide );
+
         for( int waveIdx = 0; waveIdx < curentDayData.monsters.Count; ++waveIdx )
         {
             Debug.Assert( !dayTime );
@@ -104,7 +110,7 @@ public class GameController : EventReceiverInstance
                 newMonster.GetComponent<Monster>().Initialise( next, modifiers );
                 
                 // Random layer
-                var idx = Random.Range( 0, layers.Count - 1 );
+                var idx = UnityEngine.Random.Range( 0, layers.Count - 1 );
                 newMonster.GetComponent<SpriteRenderer>().sortingOrder = layers[idx];
                 layers.RemoveAt( idx );
 

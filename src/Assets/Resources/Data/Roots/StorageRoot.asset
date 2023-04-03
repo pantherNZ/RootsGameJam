@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8c75d009e45fe1e4f8f8c2069cf208c6, type: 3}
   m_Name: StorageRoot
   m_EditorClassIdentifier: 
-  rootName: Storage Root
+  objName: Storage Root
   description: Allows storing an additional 100 Water & Nutrients
   cost:
     food: 40

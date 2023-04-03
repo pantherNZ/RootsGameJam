@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8c75d009e45fe1e4f8f8c2069cf208c6, type: 3}
   m_Name: RichNutrientRoot
   m_EditorClassIdentifier: 
-  rootName: Rich Nutrient Root
+  objName: Rich Nutrient Root
   description: Gathers 20 Nutrients per second, must be placed in fertile soil
   cost:
     food: 50

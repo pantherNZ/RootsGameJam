@@ -62,6 +62,17 @@ public class DefenceConnection : EventReceiverInstance
         InputPriority.Instance.Cancel( "defenceSelectionUI" );
     }
 
+    private void Update()
+    {
+        InputPriority.Instance.Request( () => Input.GetMouseButtonDown( 0 ) || Input.GetMouseButtonDown( 1 ), "defenceSelectionUI", 0, () =>
+        {
+            if( Input.GetMouseButtonDown( 1 ) || !Utility.IsPointerOverGameObject( defenceSelectionUI ) )
+            {
+                defenceSelectionUI.SetActive( false );
+            }
+        } );
+    }
+
     private void DefenceUIOptionClicked( BaseDefence type )
     {
         defenceSelectionUI.SetActive( false );

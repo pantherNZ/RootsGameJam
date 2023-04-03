@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8c75d009e45fe1e4f8f8c2069cf208c6, type: 3}
   m_Name: WaterRoot
   m_EditorClassIdentifier: 
-  rootName: Water Root
+  objName: Water Root
   description: Gathers 25 Water per second, must be placed in water
   cost:
     food: 150
