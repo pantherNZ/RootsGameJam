@@ -18,3 +18,10 @@ public class GameOverEvent : IBaseEvent
 public class ResetGameEvent : IBaseEvent
 {
 }
+
+
+public class SpawningStartedEvent : IBaseEvent
+{
+    public int count;
+    public SpawnPos spawnPos;
+}

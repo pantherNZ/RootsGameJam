@@ -22,7 +22,6 @@ public class GameController : EventReceiverInstance
     private List<int> validLayers = new List<int>();
 
     // Number of enemies, direction
-    public event Action<int, SpawnPos> spawningStarted;
     [HideInInspector] public PlayerController player;
     public static GameController Instance { get; private set; }
     public GameConstants Constants { get => constants; private set { } }
@@ -83,7 +82,11 @@ public class GameController : EventReceiverInstance
 
         var layers = new List<int>( validLayers );
 
-        spawningStarted?.Invoke( curentDayData.monsters.Sum( ( x ) => x.count ), curentDayData.spawnSide );
+        EventSystem.Instance.TriggerEvent( new SpawningStartedEvent()
+        {
+            count = curentDayData.monsters.Sum( ( x ) => x.count ),
+            spawnPos = curentDayData.spawnSide,
+        } );
 
         for( int waveIdx = 0; waveIdx < curentDayData.monsters.Count; ++waveIdx )
         {
