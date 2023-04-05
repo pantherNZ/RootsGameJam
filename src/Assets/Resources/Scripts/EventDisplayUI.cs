@@ -10,7 +10,6 @@ public class EventDisplayUI : EventReceiverInstance
     [SerializeField] CanvasGroup rightUI;
     [SerializeField] Transform leftSpawnPos;
     [SerializeField] Transform rightSpawnPos;
-    [SerializeField] float rotationOffsetDegrees = 135.0f;
     [SerializeField] float displayTimeSec = 3.0f;
     [SerializeField] float fadeOutTimeSec = 1.0f;
 
@@ -73,11 +72,11 @@ public class EventDisplayUI : EventReceiverInstance
         this.FadeFromBlack( ui, fadeOutTimeSec );
         Utility.FunctionTimer.CreateTimer( fadeOutTimeSec + displayTimeSec, () =>
         {
-            //this.FadeToBlack( ui, fadeOutTimeSec );
+            this.FadeToBlack( ui, fadeOutTimeSec );
         } );
         Utility.FunctionTimer.CreateTimer( displayTimeSec + fadeOutTimeSec * 2.0f, () =>
         {
-            //ui.gameObject.SetActive( false ); 
+            ui.gameObject.SetActive( false ); 
         } );
 
         Rotate( pointerIcon, spawnPos );
@@ -87,7 +86,7 @@ public class EventDisplayUI : EventReceiverInstance
     {
         var iconPos = Camera.main.ScreenToWorldPoint( pointerIcon.transform.position );
         var direction = ( spawnPos.position - iconPos ).normalized.ToVector2();
-        pointerIcon.transform.rotation = Quaternion.Euler( 0.0f, 0.0f, -direction.Angle() + rotationOffsetDegrees );
+        pointerIcon.transform.rotation = Quaternion.Euler( 0.0f, 0.0f, -direction.Angle() );
     }
 
     private void Update()
