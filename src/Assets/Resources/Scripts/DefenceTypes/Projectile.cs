@@ -5,7 +5,7 @@ public class Projectile : MonoBehaviour
 {
     [SerializeField] bool rotateTowardsMovement = true;
     [SerializeField] float maxRange = 0.0f;
-    public event Action<Collider2D> onCollision;
+    public event Func<Collider2D, bool> onCollision;
 
     private Rigidbody2D rigidBody;
     private Vector3 startPos;
@@ -22,22 +22,24 @@ public class Projectile : MonoBehaviour
             transform.right = rigidBody.velocity;
 
         if( transform.position.y <= 0.0f )
-            Destroy();
+            DestroyProjectile();
 
         if( maxRange > 0.0f && ( startPos - transform.position ).sqrMagnitude >= maxRange * maxRange )
-            Destroy();
+            DestroyProjectile();
     }
 
     private void OnTriggerEnter2D( Collider2D col )
     {
-        onCollision?.Invoke( col );
+        if( onCollision != null )
+            if( onCollision.Invoke( col ) )
+                DestroyProjectile();
     }
 
-    private void Destroy()
+    private void DestroyProjectile()
     {
         var ps = GetComponent<ParticleSystem>();
         if( ps != null )
             ps.Play();
-        gameObject.Destroy();
+        gameObject.Destroy( false );
     }
 }

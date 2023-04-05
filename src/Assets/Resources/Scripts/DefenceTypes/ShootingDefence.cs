@@ -1,9 +1,12 @@
-﻿using UnityEngine;
+﻿using System.Linq;
+using UnityEngine;
 
 public class ShootingDefence : BaseDefence, IDamageDealer
 {
     [SerializeField] GameObject projectilePrefab;
     [SerializeField] Transform projectileSpawnPos;
+    [SerializeField] float attackRange;
+    [SerializeField] LayerMask traceLayer;
     float cooldown;
 
     private void Start()
@@ -25,7 +28,8 @@ public class ShootingDefence : BaseDefence, IDamageDealer
 
     private bool CanFire()
     {
-        return true;
+        var hits = Physics2D.RaycastAll( projectileSpawnPos.transform.position, projectileSpawnPos.up, attackRange, traceLayer );
+        return hits.Any( x => x.collider.GetComponent<IDamageable>() != null );
     }
 
     private void Fire()
@@ -42,17 +46,19 @@ public class ShootingDefence : BaseDefence, IDamageDealer
         cooldown = type.attackTimeSec;
     }
 
-    private void Projectile_onCollision( Collider2D obj )
+    private bool Projectile_onCollision( Collider2D obj )
     {
         if( obj == null )
-            return;
+            return false;
 
         if( obj.GetComponent<Monster>() == null )
-            return;
+            return false;
 
         var damageable = obj.GetComponent<IDamageable>();
         if( damageable != null )
             DispatchDamage( damageable, type.damage, type.damageType );
+
+        return damageable != null;
     }
 
     public void DispatchDamage( IDamageable to, int damage, DamageType type )

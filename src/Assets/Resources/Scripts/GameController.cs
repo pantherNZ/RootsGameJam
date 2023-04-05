@@ -76,9 +76,12 @@ public class GameController : EventReceiverInstance
 
     private IEnumerator SpawnMonsters()
     {
-        var curentDayData = endlessMode ? 
-            waveData.endlessWaves[Utility.Mod( currentDay, waveData.endlessWaves.Count )] :
-            waveData.waves[currentDay];
+        var cachedEndlessMode = endlessMode;
+        var cachedDay = currentDay;
+
+        var curentDayData = cachedEndlessMode ? 
+            waveData.endlessWaves[Utility.Mod( cachedDay, waveData.endlessWaves.Count )] :
+            waveData.waves[cachedDay];
 
         var layers = new List<int>( validLayers );
 
@@ -108,7 +111,7 @@ public class GameController : EventReceiverInstance
 
                 var newMonster = Instantiate( next.monsterPrefab, spawnPos, Quaternion.identity );
                 var modifiers = curentDayData.modifier;
-                if( endlessMode )
+                if( cachedEndlessMode )
                     modifiers *= waveData.endlessPerDayModifier;
                 newMonster.GetComponent<Monster>().Initialise( next, modifiers );
                 

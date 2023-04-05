@@ -23,9 +23,13 @@ MonoBehaviour:
       count: 5
       delayPerMonsterSec: 5
       damage: 1
-      health: 10
+      health: 5
       speed: 3
       damageType: 0
+      gainOnKill:
+        food: 0
+        water: 0
+        energy: 0
     modifier:
       speedModifier: 1
       lifeModifier: 1

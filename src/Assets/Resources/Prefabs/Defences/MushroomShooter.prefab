@@ -132,3 +132,7 @@ MonoBehaviour:
   type: {fileID: 11400000, guid: 5ea45230bb6a1ce4cb6fd1e5d1d76cff, type: 2}
   projectilePrefab: {fileID: 1334331621278858448, guid: 49102af5f3aa8cb46bc297178654ed51, type: 3}
   projectileSpawnPos: {fileID: 6044390732547743822}
+  attackRange: 10
+  traceLayer:
+    serializedVersion: 2
+    m_Bits: 128
