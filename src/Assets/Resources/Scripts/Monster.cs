@@ -17,7 +17,7 @@ public class Monster : MonoBehaviour, IDamageDealer, IDamageable
     [SerializeField] string deathAnim;
     [SerializeField] LayerMask attackLayer;
 
-    [SerializeField] float speed;
+    [ReadOnly, SerializeField] float speed;
     [ReadOnly, SerializeField] int damage;
     [ReadOnly, SerializeField] bool attacking;
     [ReadOnly, SerializeField] int health;

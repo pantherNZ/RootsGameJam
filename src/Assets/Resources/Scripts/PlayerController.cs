@@ -15,6 +15,7 @@ public class Root
     public Root parent;
     public RootMeshCreator spline;
     public BaseRoot rootObject;
+    public BaseRoot originalType;
     public Vector3 fromPos;
     public int depth;
 }
@@ -271,6 +272,7 @@ public class PlayerController : EventReceiverInstance
                     rootObject = newSpline.gameObject.GetComponent<BaseRoot>(),
                     depth = currentConnection.parent.depth + 1,
                     fromPos = currentConnection.transform.position,
+                    originalType = rootType,
                 };
 
                 var connections = newSpline.GetComponentsInChildren<RootConnection>( true );
@@ -295,6 +297,7 @@ public class PlayerController : EventReceiverInstance
                     depth = currentConnection.parent.depth + 1,
                     fromPos = spline.pathCreator.path.LocalToWorld( 
                         spline.pathCreator.bezierPath.GetPoint( spline.pathCreator.bezierPath.NumPoints - 4 ) ),
+                    originalType = rootType,
                 };
 
                 // Update old connections t values (set their distance along path, so they maintain their position)
@@ -327,6 +330,7 @@ public class PlayerController : EventReceiverInstance
                 parent = currentConnection.parent,
                 rootObject = rootObj.GetComponent<BaseRoot>(),
                 depth = currentConnection.parent.depth + 1,
+                originalType = rootType,
             };
 
             var depth = ( currentConnection.parent == null ||
@@ -476,7 +480,7 @@ public class PlayerController : EventReceiverInstance
         // Cancel
         else if( Input.GetMouseButtonDown( 1 ) )
         {
-            var numNewConnections = newRoot.rootObject.GetComponentsInChildren<RootConnection>( true ).Length;
+            var numNewConnections = newRoot.originalType.GetComponentsInChildren<RootConnection>( true ).Length;
             var allConnections = newRoot.obj.GetComponentsInChildren<RootConnection>( true );
             for( int i = 0; i < numNewConnections; ++i )
             {
