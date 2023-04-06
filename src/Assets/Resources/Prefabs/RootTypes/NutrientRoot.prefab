@@ -804,7 +804,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   type: {fileID: 11400000, guid: 6e93ce758d31d8c4eb68352551068c76, type: 2}
-  placementRequirement: {fileID: 0}
+  requiredPlacements: []
   isPlaced: 0
   sprites:
   - {fileID: 6737878047431344615}

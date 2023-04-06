@@ -5,7 +5,7 @@ using System.Linq;
 public class BaseRoot : MonoBehaviour
 {
     public RootData type;
-    public Collider2D placementRequirement;
+    public List<Collider2D> requiredPlacements;
     [HideInInspector] public bool isPlaced;
     [SerializeField] List<SpriteRenderer> sprites;
 

@@ -121,6 +121,8 @@ public class LevelGenerator : MonoBehaviour
 
             for( int i = 0; i < numEnvObj; ++i )
             {
+                seedOffset += 13;
+
                 int safety = 0;
                 Vector2? spawnPos = null;
                 do

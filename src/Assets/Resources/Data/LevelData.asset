@@ -58,6 +58,15 @@ MonoBehaviour:
     objPrefab: {fileID: 680927416007596439, guid: cda25bd907e2af040be1feebd25e8d12, type: 3}
     sizeInTilesMin: 0
     sizeInTilesMax: 0
+  - spawnChancePercent: 10
+    spawnChancePercentPerChunkDepth: 0
+    numPerChunkMin: 1
+    numPerChunkMax: 5
+    minDistBetween: 1
+    tilePrefab: {fileID: 11400000, guid: 8b173876b4f5cf343b74d7cb1e555f5b, type: 2}
+    objPrefab: {fileID: 0}
+    sizeInTilesMin: 1
+    sizeInTilesMax: 5
   grassObjects:
   - {fileID: 8147382061277889737, guid: 11ec5994d3a37fb4db1f83d992400015, type: 3}
   dirtChunkPrefab: {fileID: 4337772714998171061, guid: e132f1ec05a86d14e8a394455c93cc09, type: 3}

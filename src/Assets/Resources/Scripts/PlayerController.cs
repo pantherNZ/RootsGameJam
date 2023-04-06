@@ -405,6 +405,7 @@ public class PlayerController : EventReceiverInstance
         //bool validAngle = ( Vector3.Angle( direction, currentConnection.transform.right ) <= currentConnection.rootMaxAngleDegrees / 2.0f ||
         //    ( currentConnection.allowBackwards && Vector3.Angle( direction, -currentConnection.transform.right ) > currentConnection.rootMaxAngleDegrees / 2.0f ) );
         bool validAngle = true;
+        bool validRequiredPlacement = rootType.type.placementTagRequirement.Length == 0;
         bool validCollision = colliderList.All( x =>
         {
             if( x.gameObject == newRoot.obj ||
@@ -412,38 +413,47 @@ public class PlayerController : EventReceiverInstance
                 ( ( 1 << x.gameObject.layer ) & allowPlacementLayer.value ) != 0 )
                 return true;
 
-            if( rootType != null && rootType.type.placementTagRequirement.Length > 0 && rootType.placementRequirement != null )
+            if( rootType.type.placementTagRequirement.Length > 0 && rootType.requiredPlacements != null )
             {
-                List<Collider2D> placementColliders = new List<Collider2D>();
-                rootType.placementRequirement.OverlapCollider( new ContactFilter2D().NoFilter(), placementColliders );
-                if( colliderList.IsEmpty() )
-                    return false;
-
-                bool foundRequiredPlacement = false;
-                foreach( var y in colliderList )
+                foreach( var collider in rootType.requiredPlacements )
                 {
-                    if( y.gameObject == tileMap.gameObject )
-                    {
-                        List<ContactPoint2D> contacts = new List<ContactPoint2D>();
-                        rootType.placementRequirement.GetContacts( contacts );
-
-                        if( contacts.All( c => tileMap.GetInstantiatedObject( tileMap.WorldToCell( c.point ) ).
-                            CompareTag( rootType.type.placementTagRequirement ) ) )
-                        {
-                            foundRequiredPlacement = true;
-                        }
-                    }
-                    else if( y.gameObject != newRoot.obj && !y.transform.IsChildOf( newRoot.obj.transform ) )
-                    {
+                    List<Collider2D> placementColliders = new List<Collider2D>();
+                    collider.OverlapCollider( new ContactFilter2D().NoFilter(), placementColliders );
+                    if( colliderList.IsEmpty() )
                         return false;
+
+                    foreach( var y in colliderList )
+                    {
+                        if( y.gameObject == tileMap.gameObject )
+                        {
+                            List<ContactPoint2D> contacts = new List<ContactPoint2D>();
+                            collider.GetContacts( contacts );
+
+                            if( contacts.All( c => tileMap.GetInstantiatedObject( tileMap.WorldToCell( c.point ) ).
+                                CompareTag( rootType.type.placementTagRequirement ) ) )
+                            {
+                                validRequiredPlacement = true;
+                            }
+                            else
+                            {
+                                return false;
+                            }
+                        }
+                        else if( y.gameObject != newRoot.obj && !y.transform.IsChildOf( newRoot.obj.transform ) )
+                        {
+                            return false;
+                        }
                     }
                 }
 
-                return foundRequiredPlacement;
+                return true;
             }
 
             return false;
         } );
+
+        validCollision &= validRequiredPlacement;
+        validCollision &= validAngle;
 
         if( newRoot.spline != null && validCollision )
         {
@@ -467,13 +477,11 @@ public class PlayerController : EventReceiverInstance
             }
         }
 
-        bool validPlacement = validCollision && validAngle;
-
         // Colour tint
-        newRoot.rootObject.HighlightValidPlacement( validPlacement );
+        newRoot.rootObject.HighlightValidPlacement( validCollision );
 
         // Place
-        if( validPlacement && Input.GetMouseButtonDown( 0 ) )
+        if( validCollision && Input.GetMouseButtonDown( 0 ) )
         {
             ConfirmNewRoot();
         }

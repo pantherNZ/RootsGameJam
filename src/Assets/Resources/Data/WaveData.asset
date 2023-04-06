@@ -35,6 +35,24 @@ MonoBehaviour:
       lifeModifier: 1
       damageModifier: 1
     spawnSide: 0
+  - delaySec: 1
+    monsters:
+    - monsterPrefab: {fileID: 2160609599092739193, guid: 50154c1501ad66a45b244284cabbd94c, type: 3}
+      count: 10
+      delayPerMonsterSec: 2
+      damage: 1
+      health: 1
+      speed: 5
+      damageType: 0
+      gainOnKill:
+        food: 0
+        water: 0
+        energy: 0
+    modifier:
+      speedModifier: 1
+      lifeModifier: 1
+      damageModifier: 1
+    spawnSide: 0
   endlessWaves: []
   endlessPerDayModifier:
     speedModifier: 1.1
