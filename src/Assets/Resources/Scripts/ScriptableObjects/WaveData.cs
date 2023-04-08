@@ -39,6 +39,13 @@ public struct Modifier
         lifeModifier = a.lifeModifier * b.lifeModifier,
         damageModifier = a.damageModifier * b.damageModifier,
     };
+
+    public static Modifier operator *( Modifier a, float b ) => new()
+    {
+        speedModifier = a.speedModifier * b,
+        lifeModifier = a.lifeModifier * b,
+        damageModifier = a.damageModifier * b,
+    };
 }
 
 [Serializable]
@@ -61,4 +68,5 @@ public class WaveData : ScriptableObject
     public List<Wave> waves;
     public List<Wave> endlessWaves;
     public Modifier endlessPerDayModifier;
+    public Modifier perTreeLevelModifier;
 }

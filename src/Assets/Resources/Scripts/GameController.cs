@@ -25,6 +25,7 @@ public class GameController : EventReceiverInstance
     [HideInInspector] public PlayerController player;
     public static GameController Instance { get; private set; }
     public GameConstants Constants { get => constants; private set { } }
+    public Tree tree { get; private set; }
 
     private void Awake()
     {
@@ -37,6 +38,7 @@ public class GameController : EventReceiverInstance
 
         Instance = this;
         player = FindObjectOfType<PlayerController>();
+        tree = FindObjectOfType<Tree>();
 
         currentTimeHours = waveData.startHour;
 
@@ -110,7 +112,7 @@ public class GameController : EventReceiverInstance
                 };
 
                 var newMonster = Instantiate( next.monsterPrefab, spawnPos, Quaternion.identity );
-                var modifiers = curentDayData.modifier;
+                var modifiers = curentDayData.modifier * waveData.perTreeLevelModifier * player.Level;
                 if( cachedEndlessMode )
                     modifiers *= waveData.endlessPerDayModifier;
                 newMonster.GetComponent<Monster>().Initialise( next, modifiers );

@@ -15,7 +15,7 @@ public class BaseRoot : MonoBehaviour
     private bool valid = true;
     private List<ParticleSystem> particles;
 
-    private void Awake()
+    private void Start()
     {
         particles = GetComponentsInChildren<ParticleSystem>().ToList();
 
@@ -46,6 +46,9 @@ public class BaseRoot : MonoBehaviour
     {
         this.valid = valid;
 
+        if( sprites == null || defaultSpriteColours == null || meshes == null || defaultMeshColours == null )
+            return;
+        
         foreach( var( sprite, color ) in sprites.Zip( defaultSpriteColours ) )
         {
             sprite.color = valid ? color : GameController.Instance.Constants.invalidPlacementColour;
