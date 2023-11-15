@@ -58,3 +58,7 @@ MonoBehaviour:
     speedModifier: 1.1
     lifeModifier: 1.1
     damageModifier: 1.1
+  perTreeLevelModifier:
+    speedModifier: 1
+    lifeModifier: 1
+    damageModifier: 1
